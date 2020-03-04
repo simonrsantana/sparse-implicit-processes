@@ -17,11 +17,24 @@ import tensorflow as tf
 import numpy as np
 
 
+# =============================================================================
+# We define the following two functions to simplify the rest of the code
+# =============================================================================
+
+def w_variable_mean(shape):
+  initial = tf.random_normal(shape = shape, stddev = 0.1, seed = seed) # mean 0 stddev 1
+  return tf.Variable(initial)
+
+def w_variable_variance(shape):
+  initial = tf.random_normal(shape = shape, stddev = 0.1, seed = seed) - 5.0 # mean 0 stddev 1
+  return tf.Variable(initial)
+
+
 # Import relevant functions concerning the different distributions of the model
+from aux_functions import *         # Functions that calculate moments given sampled values
 from BNN_prior import *             # Prior BNN model functions
 from neural_sampler import *        # Neural sampler that draws instances from q(·)
-from aux_functions import *         # Functions that calculate moments given sampled values
-from disc_NN import *               # NNs that discriminate samples between distributions
+from discriminators import *        # NNs that discriminate samples between distributions
 
 import os
 os.chdir(".")
@@ -55,11 +68,11 @@ dual_rate = 1e-3   # Discriminators
 # STRUCTURE OF ALL THE NNs IN THE SYSTEM
 
 # Structural parameters of the BNN
-bnn_structure = [50, 50]                        # Structure of the BNN
+bnn_structure = [50, 50, 1]                     # Structure of the BNN
 n_layers_bnn = len(bnn_structure)               # Number of layers in the NN
 
 # Structure of the neural sampler
-neural_sampler_structure = [50, 50]             # Structure of the neural sampler
+neural_sampler_structure = [50, 50, 1]          # Structure of the neural sampler
 n_layers_ns = len(neural_sampler_structure)     # Number of layers in the NS
 noise_comps_ns = 100                            # Number of gaussian variables used as input in the NS
 n_samples_qu = 20                               # ????????????????????????? TBD
@@ -74,19 +87,6 @@ n_layers_disc_approx = len(discriminator_structure_approx)  # Number of layers i
 
 discriminator_structure_prior = [50, 50]                    # Structure of the discriminator for the prior distribution
 n_layers_disc_prior = len(discriminator_structure_prior)    # Number of layers in the discriminator
-
-
-# =============================================================================
-# We define the following two functions to simplify the rest of the code
-# =============================================================================
-
-def w_variable_mean(shape):
-  initial = tf.random_normal(shape = shape, stddev = 0.1, seed = seed) # mean 0 stddev 1
-  return tf.Variable(initial)
-
-def w_variable_variance(shape):
-  initial = tf.random_normal(shape = shape, stddev = 0.1, seed = seed) - 5.0 # mean 0 stddev 1
-  return tf.Variable(initial)
 
 
 ###############################################################################
@@ -172,26 +172,26 @@ def main(permutation, split, alpha, layers):
     # Placeholders for data and number of samples
 
     x = tf.placeholder(tf.float32, [ None, dim_data ]) ################################ DEFINE THE INDUCING POINTS Z
+    z = tf.placeholder(tf.float32, [ None, dim_data ])                          # PLACEHOLDER FOR THE I.P.
     y_ = tf.placeholder(tf.float32, [ None, 1 ])
     n_samples = tf.placeholder(tf.int32, [ 1 ])[ 0 ]
     kl_factor_ = tf.placeholder(tf.float32, [ 1 ])[ 0 ]
 
     n_layers_bnn = n_layers_ns = n_layers_disc_prior = n_layers_disc_approx = layers
 
-    total_weights = 0
+    # Estimate the total number of weights needed in the BNN
+    total_weights_bnn = 0
     extended_main_structure = []
     extended_main_structure = bnn_structure[:]
     extended_main_structure.insert(0, dim_data)
 
     for i in (range(layers)):
-        total_weights += extended_main_structure[ i ] * extended_main_structure[ i+1 ]
+        total_weights_bnn += extended_main_structure[ i ] * extended_main_structure[ i+1 ]
 
-    total_weights += extended_main_structure[ layers ]  # Total number of weights used in the BNN
+    total_weights_bnn += extended_main_structure[ layers ]  # Total number of weights used in the BNN
 
 
-    # Update arrays which contain the structure of all the networks needed
-    # generator_structure.append(total_weights)
-
+    # Create arrays that will contain the structure of all the components needed
     neural_sampler = create_neural_sampler(neural_sampler_structure, noise_comps_ns, n_layers_ns)
     discriminator_prior = create_discriminator_prior(discriminator_structure_prior, total_sampled_values_prior, n_layers_disc_prior)
     discriminator_approx = create_discriminator_approx(discriminator_structure_approx, total_sampled_values_approx, n_layers_disc_approx)
@@ -199,8 +199,8 @@ def main(permutation, split, alpha, layers):
 
 
     # Obtain values for the functions sampled at the points
-    fx = compute_samples_bnn(bnn, n_layers_nn, x_input, n_samples, dim_data, bnn_structure)
-    fz = compute_samples_bnn(bnn, n_layers_nn, z_input, n_samples, dim_data, bnn_structure)
+    fx = compute_samples_bnn(bnn, n_layers_bnn, x, n_samples, dim_data, bnn_structure)
+    fz = compute_samples_bnn(bnn, n_layers_bnn, z, n_samples, dim_data, bnn_structure)
 
     #########################################################################################
     # THE INDUCING POINTS REMAIN TO BE DETERMINED STILL - SUBSET OF X (PLACEHOLDER FOR NOW) #
@@ -215,20 +215,31 @@ def main(permutation, split, alpha, layers):
     delta_fz = deltas_f(fz, m_fz)
 
     # Covariance functions
-    K_ff = calculate_covariances(delta_fx, delta_fx)
-    K_fu = calculate_covariances(delta_fx, delta_fu)
-    K_uu = calculate_covariances(delta_fz, delta_fz)
+    K_xx = calculate_covariances(delta_fx, delta_fx)
+    K_xz = calculate_covariances(delta_fx, delta_fz)    # dim = (batchsize(x), batchsize(z))
+    K_zz = calculate_covariances(delta_fz, delta_fz)
 
-    # Estimate the moments of the p(f|u)            ############################################################# ESTÁ (medio) PLANTEADO HASTA AQUÍ
+    # Estimate the moments of the p(f(x)|f(z))
+    log_sigma2_gp = w_variable_variance([ 1 ])
+    inv_term = tf.linalg.inv( K_zz + tf.eye(tf.shape(K_zz)[ 0 ]) * tf.exp(log_sigma2_gp))
+    cov_product = tf.matmul(K_xz, inv_term)
 
+    mean_est = cov_product * (y_ - tf.expand_dims(m_fx, -1))                    # Missing the mean of the evaluated points thus far
+    cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
 
+    # ALL THAT IS LEFT HERE IS TO COMPUTE THE FINAL EXPECTED VALUE FOR THE LOSS
 
-    #weights = compute_output_generator(generator, tf.shape(x)[ 0 ], n_samples, noise_comps_gen)
-    samples_qu = compute_output_ns(neural_sampler, n_samples_qu, noise_comps_ns)
+    # Obtain samples from the approximating distribution
+    samples_qu = compute_output_ns(neural_sampler, n_samples_qu, noise_comps_ns)    # right now, dims are (20(=n_samples_qu) x 1(=ns_struc[2]))
+
+    # (?) SAMPLES of q(u): They should be of shape (batchsize(z), n_samples_train) (?)
+    import pdb; pdb.set_trace()
 
     # Obtain the moments of the weights and pass the values through the disc
 
-    #mean_w , var_w = tf.nn.moments(weights, axes = [0, 1])
+    #weights = compute_output_generator(generator, tf.shape(x)[ 0 ], n_samples, noise_comps_gen)
+
+    # mean_w , var_w = tf.nn.moments(weights, axes = [0, 1])
     # mean_w = weights[:,:, : (total_weights)]
     # log_sigma2_weights = weights[:,:, (total_weights) :]
     # var_w = tf.exp( log_sigma2_weights )

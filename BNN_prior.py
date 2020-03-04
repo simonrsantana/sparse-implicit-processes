@@ -4,6 +4,12 @@
 # a BNN and auxiliar functions
 ################################################################################
 
+
+from test_code import w_variable_mean, w_variable_variance
+
+import tensorflow as tf
+import numpy as np
+
 ##### Function: create_bnn
 # Create the variables that are going to be used in the prior sampling
 # Inputs:
@@ -31,7 +37,7 @@ def create_bnn(dim_data, prior_bnn_structure, n_layers_bnn):
 
     bias3_prior  = w_variable_mean([ prior_bnn_structure[ 2 ] ])
 
-    return { 'W1_mean_prior': W1_mean_prior; 'W1_log_sigma2_prior': W1_log_sigma2_prior, 'bias1_prior': bias1_prior, \
+    return { 'W1_mean_prior': W1_mean_prior, 'W1_log_sigma2_prior': W1_log_sigma2_prior, 'bias1_prior': bias1_prior, \
         'W2_mean_prior': W2_mean_prior, 'W2_log_sigma2_prior': W2_log_sigma2_prior, 'bias2_prior': bias2_prior, \
         'W3_mean_prior': W3_mean_prior, 'W3_log_sigma2_prior': W3_log_sigma2_prior, 'bias3_prior': bias3_prior, \
         'n_layers_bnn': n_layers_bnn }
@@ -74,15 +80,15 @@ def compute_samples_bnn(prior_network, n_layers, x_input, n_samples, dim_data, p
 
     # Extract the weights' moments and the (not random) biases
     W1_mean_prior = tf.reshape(prior_network['W1_mean_prior'], shape = [1, 1, n_units1, dim_data])
-    W1_sigma2_prior = tf.reshape( tf.exp( prior_network['W1_log_sigma2_prior'] ), shape = [1, 1, n_samples, dim_data])
+    W1_sigma2_prior = tf.reshape( tf.exp( prior_network['W1_log_sigma2_prior'] ), shape = [1, 1, n_units1, dim_data])
     bias1_prior =  prior_network['bias1_prior']
 
-    W2_mean_prior = tf.reshape( prior_network['W2_mean_prior'], shape = [ 1, n_samples, n_units1, n_units2 ])
-    W2_sigma2_prior = tf.reshape( tf.exp( prior_network['W2_log_sigma2_prior'] ), shape = [ 1, n_samples, n_units1, n_units2 ])
+    W2_mean_prior = tf.reshape( prior_network['W2_mean_prior'], shape = [ 1, 1, n_units1, n_units2 ])
+    W2_sigma2_prior = tf.reshape( tf.exp( prior_network['W2_log_sigma2_prior'] ), shape = [ 1, 1, n_units1, n_units2 ])
     bias2_prior =  prior_network['bias2_prior']
 
-    W3_mean_prior = tf.reshape( prior_network['W3_mean_prior'], shape = [ 1, n_samples, n_units2, 1 ])
-    W3_sigma2_prior = tf.reshape( tf.exp( prior_network['W3_log_sigma2_prior'] ), shape = [ 1, n_samples, n_units2, 1 ])
+    W3_mean_prior = tf.reshape( prior_network['W3_mean_prior'], shape = [ 1, 1, n_units2, 1 ])
+    W3_sigma2_prior = tf.reshape( tf.exp( prior_network['W3_log_sigma2_prior'] ), shape = [ 1, 1, n_units2, 1 ])
     bias3_prior =  prior_network['bias3_prior']
 
 

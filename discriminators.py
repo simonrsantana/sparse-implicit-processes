@@ -12,6 +12,11 @@
 # to samples both from the approximating distribution q(·) and the prior p(·)
 
 
+from test_code import w_variable_mean, w_variable_variance
+
+import tensorflow as tf
+import numpy as np
+
 ################################################################################
 # Discriminator for samples of the approximate distribution q(·)
 ################################################################################

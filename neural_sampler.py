@@ -1,10 +1,13 @@
 
-
 ################################################################################
 # Here we define the NEURAL SAMPLER that will be used to draw samples from the
 # approximate distribution over functions evaluated at the induced points
 ################################################################################
 
+from test_code import w_variable_mean, w_variable_variance
+
+import tensorflow as tf
+import numpy as np
 
 
 ##### Function: create_neural_sampler
@@ -75,7 +78,7 @@ def compute_output_ns(neural_sampler, n_samples, noise_comps_ns): # Excluded bat
     bias3_ns = neural_sampler['bias3_ns']
 
     # pre_init_noise = tf.random_normal(shape = [ batchsize, n_samples, noise_comps_ns ], seed = seed)
-    pre_init_noise = tf.random_normal(shape = [ n_samples, noise_comps_ns ], seed = seed)
+    pre_init_noise = tf.random_normal(shape = [ n_samples, noise_comps_ns ])
 
     init_noise =  mean_noise + tf.sqrt(tf.exp( log_var_noise )) * pre_init_noise
 
