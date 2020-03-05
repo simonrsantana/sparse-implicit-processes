@@ -12,6 +12,7 @@ import argparse
 import sys
 import time
 from datetime import datetime
+import random
 
 import tensorflow as tf
 import numpy as np
@@ -52,10 +53,13 @@ original_file = sys.argv[ 4 ]
 n_samples_train = 20
 n_samples_test = 100
 
-n_batch = 10
+n_batch = 100
 n_epochs = 100
 
 ratio_train = 0.9 # Percentage of the data devoted to train
+
+# Number of inducing points
+number_IP = 50
 
 # Parameters concerning the annealing factor of the KL divergence
 kl_factor_limit = int(n_epochs / 10)
@@ -75,18 +79,12 @@ n_layers_bnn = len(bnn_structure)               # Number of layers in the NN
 neural_sampler_structure = [50, 50, 1]          # Structure of the neural sampler
 n_layers_ns = len(neural_sampler_structure)     # Number of layers in the NS
 noise_comps_ns = 100                            # Number of gaussian variables used as input in the NS
-n_samples_qu = 20                               # ????????????????????????? TBD
 
-total_sampled_values_prior = 20                 # ????????????????????????? TBD
-total_sampled_values_approx = 20                # ????????????????????????? TBD
 
 
 # Structure of the discriminators
-discriminator_structure_approx = [50, 50]                   # Structure of the discriminator for the approx. distribution
-n_layers_disc_approx = len(discriminator_structure_approx)  # Number of layers in the discriminator
-
-discriminator_structure_prior = [50, 50]                    # Structure of the discriminator for the prior distribution
-n_layers_disc_prior = len(discriminator_structure_prior)    # Number of layers in the discriminator
+discriminator_structure = [50, 50]                  # Structure of the discriminator for the approx. distribution
+n_layers_disc = len(discriminator_structure)        # Number of layers in the discriminator
 
 
 ###############################################################################
@@ -142,7 +140,6 @@ def main(permutation, split, alpha, layers):
 
     data_size = X.shape[ 0 ]
     size_train = int(np.round(data_size * ratio_train))
-    total_training_data = size_train
 
     index_train = permutation[ 0 : size_train ]
     index_test = permutation[ size_train : ]
@@ -166,16 +163,23 @@ def main(permutation, split, alpha, layers):
 
 
     # Create the model
-
     dim_data = X_train.shape[ 1 ]
 
-    # Placeholders for data and number of samples
 
-    x = tf.placeholder(tf.float32, [ None, dim_data ]) ################################ DEFINE THE INDUCING POINTS Z
-    z = tf.placeholder(tf.float32, [ None, dim_data ])                          # PLACEHOLDER FOR THE I.P.
+    # Placeholders for data and number of samples
+    x = tf.placeholder(tf.float32, [ None, dim_data ])
     y_ = tf.placeholder(tf.float32, [ None, 1 ])
     n_samples = tf.placeholder(tf.int32, [ 1 ])[ 0 ]
     kl_factor_ = tf.placeholder(tf.float32, [ 1 ])[ 0 ]
+
+
+    # Introduce the inducing points as variables initialized in a random subset of X
+    index_shuffle = [x for x in range(size_train)]
+    random.shuffle(index_shuffle)
+    index_IP = index_shuffle[ : number_IP ]
+    z = tf.Variable(X_train[ index_IP, : ])         # Initialize the inducing points at random values of X_train
+
+    import pdb; pdb.set_trace()
 
     n_layers_bnn = n_layers_ns = n_layers_disc_prior = n_layers_disc_approx = layers
 
@@ -193,8 +197,8 @@ def main(permutation, split, alpha, layers):
 
     # Create arrays that will contain the structure of all the components needed
     neural_sampler = create_neural_sampler(neural_sampler_structure, noise_comps_ns, n_layers_ns)
-    discriminator_prior = create_discriminator_prior(discriminator_structure_prior, total_sampled_values_prior, n_layers_disc_prior)
-    discriminator_approx = create_discriminator_approx(discriminator_structure_approx, total_sampled_values_approx, n_layers_disc_approx)
+    discriminator_prior = create_discriminator_fs(discriminator_structure, n_samples_train, n_layers_disc)
+    discriminator_approx = create_discriminator_fs(discriminator_structure, n_samples_train, n_layers_disc)
     bnn = create_bnn(dim_data, bnn_structure, n_layers_bnn)
 
 
@@ -219,18 +223,23 @@ def main(permutation, split, alpha, layers):
     K_xz = calculate_covariances(delta_fx, delta_fz)    # dim = (batchsize(x), batchsize(z))
     K_zz = calculate_covariances(delta_fz, delta_fz)
 
+    # Obtain samples from the approximating distribution
+    samples_qu = compute_output_ns(neural_sampler, n_samples_train, noise_comps_ns)    # right now, dims are (20(=n_samples_train) x 1(=ns_struc[2]))
+
     # Estimate the moments of the p(f(x)|f(z))
     log_sigma2_gp = w_variable_variance([ 1 ])
     inv_term = tf.linalg.inv( K_zz + tf.eye(tf.shape(K_zz)[ 0 ]) * tf.exp(log_sigma2_gp))
     cov_product = tf.matmul(K_xz, inv_term)
+
+    #######################################
+    # HACER CORRECCIONES A PARTIR DE AQUÍ #
+    #######################################
 
     mean_est = cov_product * (y_ - tf.expand_dims(m_fx, -1))                    # Missing the mean of the evaluated points thus far
     cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
 
     # ALL THAT IS LEFT HERE IS TO COMPUTE THE FINAL EXPECTED VALUE FOR THE LOSS
 
-    # Obtain samples from the approximating distribution
-    samples_qu = compute_output_ns(neural_sampler, n_samples_qu, noise_comps_ns)    # right now, dims are (20(=n_samples_qu) x 1(=ns_struc[2]))
 
     # (?) SAMPLES of q(u): They should be of shape (batchsize(z), n_samples_train) (?)
     import pdb; pdb.set_trace()
@@ -284,7 +293,7 @@ def main(permutation, split, alpha, layers):
     # Make the estimates of the ELBO for the primary classifier
 
     ELBO = (tf.reduce_sum(res_train) - kl_factor_ * tf.reduce_mean(KL) * tf.cast(tf.shape(x)[ 0 ], tf.float32) / \
-        tf.cast(total_training_data, tf.float32)) * tf.cast(total_training_data, tf.float32) / tf.cast(tf.shape(x)[ 0 ], tf.float32)
+        tf.cast(size_train, tf.float32)) * tf.cast(size_train, tf.float32) / tf.cast(tf.shape(x)[ 0 ], tf.float32)
 
     neg_ELBO = -ELBO
     main_loss = neg_ELBO
