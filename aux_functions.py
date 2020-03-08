@@ -29,6 +29,6 @@ def calculate_covariances(delta_1, delta_2):
     #    print("Number of samples on the inputs: " + str(delta_1.shape) + " and " + str(delta_2.shape) + "do not coincide")
 
     # Matrix multiplications averaging out in sample size
-    K_ff = (1 / tf.cast(tf.shape(delta_1)[ 1 ], tf.float32) ) * tf.matmul( delta_1,  delta_2, transpose_b = True)
+    K_ff = (1 / (tf.cast(tf.shape(delta_1)[ 1 ], tf.float32) - 1 )) * tf.matmul( delta_1,  delta_2, transpose_b = True)
 
     return K_ff # dims are (delta_1 batchsize x delta_2 batchsize)

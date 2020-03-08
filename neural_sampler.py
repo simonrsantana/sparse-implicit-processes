@@ -94,4 +94,4 @@ def compute_output_ns(neural_sampler, n_samples, noise_comps_ns): # Excluded bat
         h2_ns = tf.nn.leaky_relu(A2_ns)
         A3_ns = tf.matmul(h2_ns, W3_ns) + bias3_ns    # final weights
 
-    return A3_ns    # final samples from q(·) - dim = (n_samples, ns_structure[ 2 ])
+    return tf.transpose(A3_ns)   # final samples from q(·) - dim = (number_IP, n_samples)

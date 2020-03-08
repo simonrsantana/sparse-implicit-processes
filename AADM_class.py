@@ -169,6 +169,8 @@ def compute_output_discriminator(discriminator, weights, n_layers):
     A1_disc = tf.tensordot(weights, W1_disc, axes = [[2], [0]]) + bias1_disc
     h1_disc = tf.nn.leaky_relu(A1_disc)
 
+    import pdb; pdb.set_trace()
+
     if discriminator['n_layers_disc'] == 2:
         A2_disc = tf.tensordot(h1_disc, W2_disc, axes = [[2], [0]]) + bias2_disc
         h2_disc = tf.nn.leaky_relu(A2_disc)

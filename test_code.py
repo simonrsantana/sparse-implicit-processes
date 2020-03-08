@@ -76,7 +76,7 @@ bnn_structure = [50, 50, 1]                     # Structure of the BNN
 n_layers_bnn = len(bnn_structure)               # Number of layers in the NN
 
 # Structure of the neural sampler
-neural_sampler_structure = [50, 50, 1]          # Structure of the neural sampler
+neural_sampler_structure = [50, 50, number_IP]  # Structure of the neural sampler
 n_layers_ns = len(neural_sampler_structure)     # Number of layers in the NS
 noise_comps_ns = 100                            # Number of gaussian variables used as input in the NS
 
@@ -125,7 +125,7 @@ def main(permutation, split, alpha, layers):
 
     # We load the original dataset
 
-    data = np.loadtxt(original_file)
+    data = np.loadtxt(original_file).astype(np.float32)
 
     # =========================================================================
     #  Parameters of the complete system
@@ -179,8 +179,6 @@ def main(permutation, split, alpha, layers):
     index_IP = index_shuffle[ : number_IP ]
     z = tf.Variable(X_train[ index_IP, : ])         # Initialize the inducing points at random values of X_train
 
-    import pdb; pdb.set_trace()
-
     n_layers_bnn = n_layers_ns = n_layers_disc_prior = n_layers_disc_approx = layers
 
     # Estimate the total number of weights needed in the BNN
@@ -197,8 +195,8 @@ def main(permutation, split, alpha, layers):
 
     # Create arrays that will contain the structure of all the components needed
     neural_sampler = create_neural_sampler(neural_sampler_structure, noise_comps_ns, n_layers_ns)
-    discriminator_prior = create_discriminator_fs(discriminator_structure, n_samples_train, n_layers_disc)
-    discriminator_approx = create_discriminator_fs(discriminator_structure, n_samples_train, n_layers_disc)
+    discriminator_prior = create_discriminator(discriminator_structure, number_IP, n_layers_disc)
+    discriminator_approx = create_discriminator(discriminator_structure, number_IP, n_layers_disc)
     bnn = create_bnn(dim_data, bnn_structure, n_layers_bnn)
 
 
@@ -223,20 +221,23 @@ def main(permutation, split, alpha, layers):
     K_xz = calculate_covariances(delta_fx, delta_fz)    # dim = (batchsize(x), batchsize(z))
     K_zz = calculate_covariances(delta_fz, delta_fz)
 
+    additive_factor = 1e-5
+    inv_K_zz = K_zz + tf.eye(tf.shape(K_zz)[ 0 ]) * additive_factor   # To ensure it is invertible we add a small noise
+
     # Obtain samples from the approximating distribution
-    samples_qu = compute_output_ns(neural_sampler, n_samples_train, noise_comps_ns)    # right now, dims are (20(=n_samples_train) x 1(=ns_struc[2]))
+    samples_qu = compute_output_ns(neural_sampler, n_samples, noise_comps_ns)    # right now, dims are (number_IP, n_samples)
 
     # Estimate the moments of the p(f(x)|f(z))
     log_sigma2_gp = w_variable_variance([ 1 ])
-    inv_term = tf.linalg.inv( K_zz + tf.eye(tf.shape(K_zz)[ 0 ]) * tf.exp(log_sigma2_gp))
+    inv_term = tf.linalg.inv( inv_K_zz )
     cov_product = tf.matmul(K_xz, inv_term)
 
-    #######################################
-    # HACER CORRECCIONES A PARTIR DE AQUÍ #
-    #######################################
-
-    mean_est = cov_product * (y_ - tf.expand_dims(m_fx, -1))                    # Missing the mean of the evaluated points thus far
+    #### WE ARE DOING THE MEAN THROUGH THE SAMPLES OF f(z) (= u)
+    mean_est = tf.reduce_mean( tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (fz - tf.expand_dims(m_fz, -1)), axes = [[1], [0]]), axis = 1)                  # Missing the mean of the evaluated points thus far
     cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
+
+    import pdb; pdb.set_trace()
+
 
     # ALL THAT IS LEFT HERE IS TO COMPUTE THE FINAL EXPECTED VALUE FOR THE LOSS
 
@@ -285,7 +286,6 @@ def main(permutation, split, alpha, layers):
     #res_train, squared_error, log_prob_data = compute_outputs_main_NN(main_NN, x, y_, weights, \
     #    alpha, n_samples, dim_data, meanyTrain, stdyTrain)
 
-    means_fx, delta_s_fx = compute_res_new_NN(main_NN, x, weights, alpha, n_samples, dim_data, total_weights)
     #res_train, squared_error, log_prob_data = compute_base_res_NN(main_NN, x, y_, weights, \
     #    alpha, n_samples, dim_data) #, meanyTrain, stdyTrain)
 

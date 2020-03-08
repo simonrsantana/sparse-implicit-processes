@@ -97,6 +97,7 @@ def compute_samples_bnn(prior_network, n_layers, x_input, n_samples, dim_data, p
     noise_2 = tf.random_normal(shape = [ batch_size, n_samples, n_units2 ]) #, seed = seed)
     noise_3 = tf.random_normal(shape = [ batch_size, n_samples, 1 ]) #, seed = seed)
 
+    # import pdb; pdb.set_trace()
 
     # Compute the output of the network employing the local reparametrization trick
     x_expanded = tf.reshape(x_input, shape = [ batch_size, 1, 1, dim_data]) # Extend dimensions
