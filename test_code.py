@@ -233,28 +233,35 @@ def main(permutation, split, alpha, layers):
     cov_product = tf.matmul(K_xz, inv_term)
 
     #### WE ARE DOING THE MEAN THROUGH THE SAMPLES OF f(z) (= u)
-    mean_est = tf.reduce_mean( tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (fz - tf.expand_dims(m_fz, -1)), axes = [[1], [0]]), axis = 1)                  # Missing the mean of the evaluated points thus far
+    # mean_est = tf.reduce_mean( tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]]), axis = 1)                  # Missing the mean of the evaluated points thus far
+
+    # Instead of using u from the prior p(·), we use u from the approximate distribution q(·) for the differences in the expression
+    mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])               # Missing the mean of the evaluated points thus far
     cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
 
-    sample_pf_noise = tf.random_normal(shape = [tf.shape(x)[ 0 ]])
-    samples_pf = mean_est +  tf.tensordot(cov_est, sample_pf_noise, axes = [[1], [0]])
+    sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
+    # samples_pf = mean_est +  tf.tensordot(cov_est, sample_pf_noise, axes = [[1], [0]])
+    samples_pf = mean_est +  tf.matmul(cov_est, sample_pf_noise)                # Shape is (batchsize, n_samples)
 
     # Estimate the log(p(f|y)) sample values
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 
-    res_train = ( 1.0/alpha) * (- np.log( samples_train ) + tf.reduce_logsumexp( alpha * (-0.5 * (np.log(2.0 * np.pi) + log_sigma2_noise + (A2 - tf.reshape(y_, shape = [ tf.shape(x)[0], 1, 1 ]))**2 / tf.exp(log_sigma2_noise))) , axis = [ 1 ]))
+    import pdb; pdb.set_trace()
 
     # Correct the expression
     log_pf = (1.0/alpha) * ( -np.log(n_samples) + tf.reduce_logsumexp( alpha * (-0.5 * (np.log( 2 * np.pi ) )) ))
+    res_train = ( 1.0/alpha) * (- np.log( samples_train ) + tf.reduce_logsumexp( alpha * (-0.5 * (np.log(2.0 * np.pi) + log_sigma2_noise + (A2 - tf.reshape(y_, shape = [ tf.shape(x)[0], 1, 1 ]))**2 / tf.exp(log_sigma2_noise))) , axis = [ 1 ]))
+
 
     import pdb; pdb.set_trace()
+
 
 
     # ALL THAT IS LEFT HERE IS TO COMPUTE THE FINAL EXPECTED VALUE FOR THE LOSS
 
 
     # (?) SAMPLES of q(u): They should be of shape (batchsize(z), n_samples_train) (?)
-    import pdb; pdb.set_trace()
+
 
     # Obtain the moments of the weights and pass the values through the disc
 
