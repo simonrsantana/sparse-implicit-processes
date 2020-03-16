@@ -170,7 +170,7 @@ def main(permutation, split, alpha, layers):
     x = tf.placeholder(tf.float32, [ None, dim_data ])
     y_ = tf.placeholder(tf.float32, [ None, 1 ])
     n_samples = tf.placeholder(tf.int32, [ 1 ])[ 0 ]
-    kl_factor_ = tf.placeholder(tf.float32, [ 1 ])[ 0 ]
+    kl_factor = tf.placeholder(tf.float32, [ 1 ])[ 0 ]
 
 
     # Introduce the inducing points as variables initialized in a random subset of X
@@ -232,7 +232,6 @@ def main(permutation, split, alpha, layers):
     #################
 
     # Estimate the moments of the p(f(x)|f(z))
-    log_sigma2_gp = w_variable_variance([ 1 ])
     inv_term = tf.linalg.inv( inv_K_zz )
     cov_product = tf.matmul(K_xz, inv_term)
 
@@ -250,8 +249,8 @@ def main(permutation, split, alpha, layers):
     # Estimate the log(p(f|y)) sample values
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 
-    # Correct the expression
-    log_pf = (1.0/alpha) * ( -tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
+    # Final loss for the data term
+    loss_train = (1.0/alpha) * ( -tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
 
 
     ###############
@@ -297,40 +296,37 @@ def main(permutation, split, alpha, layers):
 
     KL = -(T_real_p - T_real_q + log_p_gaussian - log_q_gaussian)
 
+
+    ######################
+    # Calculate the ELBO #
+    ######################
+
+
+    ELBO = ( tf.reduce_sum( loss_train ) / tf.cast(n_samples, tf.float32) * tf.cast(size_train, tf.float32) / tf.cast(tf.shape(x)[ 0 ], tf.float32) - \
+        kl_factor * tf.reduce_mean( KL ) )
+
+    neg_ELBO = -ELBO
+    mean_ELBO = ELBO
+
+    mean_KL = tf.reduce_mean(KL)
+
+    vars_primal = get_variables_ns(neural_sampler) + get_variables_bnn(bnn) + log_sigma2_noise
+    vars_disc_prior = get_variables_discriminator(discriminator_prior)
+    vars_disc_approx = get_variables_discriminator(discriminator_approx)
+
+    train_step_primal = tf.train.AdamOptimizer(primal_rate).minimize(neg_ELBO, var_list = vars_primal)
+    train_step_disc_prior = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_p, var_list = vars_disc_prior)
+    train_step_disc_approx = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_q, var_list = vars_disc_approx)
+
+    # HAY ALGO MAL EN LOS SIGNOS Y LAS SUMAS DE LA ELBO, NECESITA REVISIÓN
+
+
     import pdb; pdb.set_trace()
 
 
 
-    # Obtain the KL and ELBO
-
-#    logr = -0.5 * tf.reduce_sum(norm_weights**2 + tf.log(var_w) + np.log(2.0 * np.pi), [ 2 ])
-#    logz = -0.5 * tf.reduce_sum((weights)**2 / tf.exp(main_NN['log_vars_prior']) + main_NN['log_vars_prior'] + np.log(2.0 * np.pi), [ 2 ])
-#    KL = (T_real + logr - logz)
-
-    #res_train, squared_error, log_prob_data = compute_outputs_main_NN(main_NN, x, y_, weights, \
-    #    alpha, n_samples, dim_data, meanyTrain, stdyTrain)
-
-    #res_train, squared_error, log_prob_data = compute_base_res_NN(main_NN, x, y_, weights, \
-    #    alpha, n_samples, dim_data) #, meanyTrain, stdyTrain)
-
-
-    # Make the estimates of the ELBO for the primary classifier
-
-    ELBO = (tf.reduce_sum(res_train) - kl_factor_ * tf.reduce_mean(KL) * tf.cast(tf.shape(x)[ 0 ], tf.float32) / \
-        tf.cast(size_train, tf.float32)) * tf.cast(size_train, tf.float32) / tf.cast(tf.shape(x)[ 0 ], tf.float32)
-
-    neg_ELBO = -ELBO
-    main_loss = neg_ELBO
-    mean_ELBO = ELBO
-
-    # KL y res_train have shape batch_size x n_samples
-
-    mean_KL = tf.reduce_mean(KL)
-
     # Create the variable lists to be updated
 
-    vars_primal = get_variables_generator(generator) + get_variables_main_NN(main_NN)
-    vars_dual = get_variables_discriminator(discriminator)
 
     train_step_primal = tf.train.AdamOptimizer(primal_rate).minimize(main_loss, var_list = vars_primal)
     train_step_dual = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_per_point, var_list = vars_dual)
