@@ -246,11 +246,8 @@ def main(permutation, split, alpha, layers):
     # Estimate the log(p(f|y)) sample values
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 
-    import pdb; pdb.set_trace()
-
     # Correct the expression
-    log_pf = (1.0/alpha) * ( -np.log(n_samples) + tf.reduce_logsumexp( alpha * (-0.5 * (np.log( 2 * np.pi ) )) ))
-    res_train = ( 1.0/alpha) * (- np.log( samples_train ) + tf.reduce_logsumexp( alpha * (-0.5 * (np.log(2.0 * np.pi) + log_sigma2_noise + (A2 - tf.reshape(y_, shape = [ tf.shape(x)[0], 1, 1 ]))**2 / tf.exp(log_sigma2_noise))) , axis = [ 1 ]))
+    log_pf = (1.0/alpha) * ( -tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
 
 
     import pdb; pdb.set_trace()

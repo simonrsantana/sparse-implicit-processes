@@ -169,8 +169,6 @@ def compute_output_discriminator(discriminator, weights, n_layers):
     A1_disc = tf.tensordot(weights, W1_disc, axes = [[2], [0]]) + bias1_disc
     h1_disc = tf.nn.leaky_relu(A1_disc)
 
-    import pdb; pdb.set_trace()
-
     if discriminator['n_layers_disc'] == 2:
         A2_disc = tf.tensordot(h1_disc, W2_disc, axes = [[2], [0]]) + bias2_disc
         h2_disc = tf.nn.leaky_relu(A2_disc)
@@ -239,8 +237,6 @@ def compute_outputs_main_NN(network, x_input, y_target, weights, alpha, n_sample
         labels = y_target[:,None,], logits = A3), axis = [ 1 ])) - tf.log(tf.cast(n_samples, tf.float32))))
 
     error = tf.reduce_sum(tf.math.abs(tf.math.round(tf.reduce_mean(tf.math.sigmoid(A3), axis = [ 1 ])) - y_target))
-
-    import pdb; pdb.set_trace()
 
     return res_train, error, log_prob_data
 
@@ -402,6 +398,8 @@ def main(permutation, split, alpha, layers):
 
                 batch = [ X_train[ i_batch * n_batch : last_point, : ] , y_train[ i_batch * n_batch : last_point, ] ]
 
+                import pdb; pdb.set_trace()
+
                 sess.run(train_step_dual, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
                     kl_factor_: kl_factor})
                 sess.run(train_step_primal, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
@@ -435,6 +433,8 @@ def main(permutation, split, alpha, layers):
 
                 errors += sess.run(error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test})
                 LL += sess.run(log_prob_data, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test})
+
+                import pdb; pdb.set_trace()
 
             error_class = errors / float(X_test.shape[ 0 ])
             TestLL = (LL / float(X_test.shape[ 0 ]))
