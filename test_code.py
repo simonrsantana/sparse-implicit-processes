@@ -227,6 +227,10 @@ def main(permutation, split, alpha, layers):
     # Obtain samples from the approximating distribution
     samples_qu = compute_output_ns(neural_sampler, n_samples, noise_comps_ns)    # right now, dims are (number_IP, n_samples)
 
+    #################
+    ### LOSS TERM ###
+    #################
+
     # Estimate the moments of the p(f(x)|f(z))
     log_sigma2_gp = w_variable_variance([ 1 ])
     inv_term = tf.linalg.inv( inv_K_zz )
@@ -250,47 +254,52 @@ def main(permutation, split, alpha, layers):
     log_pf = (1.0/alpha) * ( -tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
 
 
+    ###############
+    ### KL TERM ###
+    ###############
+
+    # Estimate the means and variances of the samples of p(u) and q(u) to feed normalized samples to the discriminators
+    mean_p, var_p = tf.nn.moments(fz, axes = [ 1 ])
+    mean_q, var_q = tf.nn.moments(samples_qu, axes = [ 1 ])
+
+    tf.stop_gradient(mean_p); tf.stop_gradient(var_p);
+    tf.stop_gradient(mean_q); tf.stop_gradient(var_q);
+
+    # Normalize the samples
+    norm_p = (tf.transpose(fz) - mean_p) / var_p
+    norm_q = (tf.transpose(samples_qu) - mean_q) / var_q
+
+    # Construct the auxiliar gaussian distributions
+    samples_p_gaussian = tf.random_normal(shape = tf.shape(norm_p), mean = 0, stddev = 1)  #, seed = seed)
+    samples_q_gaussian = tf.random_normal(shape = tf.shape(norm_q), mean = 0, stddev = 1)  #, seed = seed)
+
+    # Obtain the results from the discriminators
+    T_real_p = compute_output_discriminator(discriminator_prior, norm_p, layers)
+    T_sampled_p = compute_output_discriminator(discriminator_prior, samples_p_gaussian, layers)
+
+    T_real_q = compute_output_discriminator(discriminator_approx, norm_q, layers)
+    T_sampled_q = compute_output_discriminator(discriminator_approx, samples_q_gaussian, layers)
+
+    # Obtain the cross entropy for the results of each discriminator
+    p_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_real_p, labels=tf.ones_like(T_real_p)))
+    p_loss_sampled = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_sampled_p, labels=tf.zeros_like(T_sampled_p)))
+
+    q_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_real_q, labels=tf.ones_like(T_real_q)))
+    q_loss_sampled = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_sampled_q, labels=tf.zeros_like(T_sampled_q)))
+
+    # CE per point
+    cross_entropy_p = (p_loss_real + p_loss_sampled) / 2.0
+    cross_entropy_q = (q_loss_real + q_loss_sampled) / 2.0
+
+    # Calculate the rest of the KL terms
+    log_p_gaussian = -0.5 * tf.reduce_sum(np.log(2 * np.pi) + tf.log(var_p) + norm_p**2, axis = [ 1 ])
+    log_q_gaussian = -0.5 * tf.reduce_sum(np.log(2 * np.pi) + tf.log(var_q) + norm_q**2, axis = [ 1 ])
+
+    KL = -(T_real_p - T_real_q + log_p_gaussian - log_q_gaussian)
+
     import pdb; pdb.set_trace()
 
 
-
-    # ALL THAT IS LEFT HERE IS TO COMPUTE THE FINAL EXPECTED VALUE FOR THE LOSS
-
-
-    # (?) SAMPLES of q(u): They should be of shape (batchsize(z), n_samples_train) (?)
-
-
-    # Obtain the moments of the weights and pass the values through the disc
-
-    #weights = compute_output_generator(generator, tf.shape(x)[ 0 ], n_samples, noise_comps_gen)
-
-    # mean_w , var_w = tf.nn.moments(weights, axes = [0, 1])
-    # mean_w = weights[:,:, : (total_weights)]
-    # log_sigma2_weights = weights[:,:, (total_weights) :]
-    # var_w = tf.exp( log_sigma2_weights )
-
-    # mean_w = tf.stop_gradient(mean_w)
-    # var_w = tf.stop_gradient(var_w)
-
-    # Normalize real weights
-
-#    norm_weights = (weights - mean_w) / tf.sqrt(var_w)     # There is no need for this since the sampled are moments
-
-    # Generate samples of a normal distribution with the moments of the weights
-
-    # w_gaussian = tf.random_normal(shape = tf.shape(weights), mean = 0, stddev = 1, seed = seed)
-
-    # Obtain the T(z,x) for the real and the sampled weights
-
-#    T_real = compute_output_discriminator(discriminator, norm_weights, layers)
-#    T_sampled = compute_output_discriminator(discriminator, w_gaussian, layers)
-
-    # Calculate the cross entropy loss for the discriminator
-
-#    d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_real, labels=tf.ones_like(T_real)))
-#    d_loss_sampled = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_sampled, labels=tf.zeros_like(T_sampled)))
-
-#    cross_entropy_per_point = (d_loss_real + d_loss_sampled) / 2.0
 
     # Obtain the KL and ELBO
 

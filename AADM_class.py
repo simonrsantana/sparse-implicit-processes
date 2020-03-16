@@ -434,8 +434,6 @@ def main(permutation, split, alpha, layers):
                 errors += sess.run(error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test})
                 LL += sess.run(log_prob_data, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test})
 
-                import pdb; pdb.set_trace()
-
             error_class = errors / float(X_test.shape[ 0 ])
             TestLL = (LL / float(X_test.shape[ 0 ]))
 
