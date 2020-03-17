@@ -294,7 +294,7 @@ def main(permutation, split, alpha, layers):
     #### MEAN OR SUM ???? ####
     ##########################
 
-    KL = -(T_real_p - T_real_q + log_p_gaussian - log_q_gaussian)
+    KL = T_real_p - T_real_q + log_p_gaussian - log_q_gaussian
 
 
     ######################
@@ -346,15 +346,15 @@ def main(permutation, split, alpha, layers):
             # Annealing factor for the KL term
             kl_factor = np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
 
+            ini = time.clock()
+            ini_ref = time.time()
+            ini_train = time.clock()
+
             # Train the model
             n_batches_train = int(np.ceil(size_train / n_batch))
             for i_batch in range(n_batches_train):
 
                 kl_factor = 1
-
-                ini = time.clock()
-                ini_ref = time.time()
-                ini_train = time.clock()
 
                 last_point = np.minimum(n_batch * (i_batch + 1), size_train)
 
@@ -384,14 +384,18 @@ def main(permutation, split, alpha, layers):
             fini = time.clock()
             fini_ref = time.time()
 
+            sys.stdout.write('\n')
+            sys.stdout.flush()
+
             # Store the training results while running
-            print("\n" + 'alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor))
+            with open("prints/print_IPs_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
+                res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor) + "\n")
 
         import pdb; pdb.set_trace()
 
         # Test Evaluation
         sys.stdout.write('\n')
-        ini_test = time.time()
+        # ini_test = time.time()
 
         # We do the test evaluation RMSE
 
@@ -411,20 +415,7 @@ def main(permutation, split, alpha, layers):
         RMSE = np.sqrt(errors / n_batches_to_process)
         TestLL = LL / n_batches_to_process
 
-
-        fini_test = time.time()
-        fini = time.clock()
-        fini_ref = time.time()
-        total_fini = time.time()
-
-        string = ('alpha %g batch %g datetime %s epoch %d ELBO %g CROSS-ENT %g KL %g real_time %g cpu_time %g ' + \
-            'train_time %g test_time %g total_time %g KL_factor %g LL %g RMSE %g') % \
-            (alpha, i_batch, str(datetime.now()), epoch, \
-            L / n_batches_train, ce_estimate / n_batches_train, kl / n_batches_train, (fini_ref - \
-            ini_ref), (fini - ini), (fini_train - ini_train), (fini_test - ini_test), (total_fini - total_ini), \
-            kl_factor, TestLL, RMSE)
-        print(string)
-        sys.stdout.flush()
+        # fini_test = time.time()
 
         L = 0.0
         ce_estimate = 0.0
@@ -443,6 +434,15 @@ if __name__ == '__main__':
     # Load the permutation to be used
 
     available_perm = np.loadtxt('permutations_' + original_file, delimiter = ",", dtype = int)
+
+    # Create a folder to store the screen prints
+    if not os.path.isdir("prints"):
+        os.makedirs("prints")
+
+    # Create a file to store the results of the run (or empty the previously existing one)
+    if os.path.isfile("prints/print_IPs_" + str(alpha) + "_" + str(split) + "_" +  original_file):
+        with open("prints/print_IPs_" + str(alpha) + "_" + str(split) + "_" +  original_file, "w") as res_file:
+           res_file.close()
 
     # Create the folder to save all the results
     if not os.path.isdir("res_alpha"):
