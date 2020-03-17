@@ -313,9 +313,6 @@ def main(permutation, split, alpha, layers):
     train_step_disc_prior = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_p, var_list = vars_disc_prior)
     train_step_disc_approx = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_q, var_list = vars_disc_approx)
 
-    # HAY ALGO MAL EN LOS SIGNOS Y LAS SUMAS DE LA ELBO, NECESITA REVISIÓN
-
-
     # import pdb; pdb.set_trace()
 
 
