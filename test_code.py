@@ -161,8 +161,6 @@ def main(permutation, split, alpha, layers):
     X_test = (X_test - meanXTrain) / stdXTrain
     y_train = (y_train - meanyTrain) / stdyTrain
 
-
-    # Create the model
     dim_data = X_train.shape[ 1 ]
 
 
@@ -236,10 +234,9 @@ def main(permutation, split, alpha, layers):
     cov_product = tf.matmul(K_xz, inv_term)
 
     #### WE ARE DOING THE MEAN THROUGH THE SAMPLES OF f(z) (= u)
-    # mean_est = tf.reduce_mean( tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]]), axis = 1)                  # Missing the mean of the evaluated points thus far
-
+    # mean_est = tf.reduce_mean( tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]]), axis = 1)
     # Instead of using u from the prior p(·), we use u from the approximate distribution q(·) for the differences in the expression
-    mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])               # Missing the mean of the evaluated points thus far
+    mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])     # Missing the mean of the evaluated points thus far
     cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
 
     sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
@@ -290,8 +287,12 @@ def main(permutation, split, alpha, layers):
     cross_entropy_q = (q_loss_real + q_loss_sampled) / 2.0
 
     # Calculate the rest of the KL terms
-    log_p_gaussian = -0.5 * tf.reduce_sum(np.log(2 * np.pi) + tf.log(var_p) + norm_p**2, axis = [ 1 ])
-    log_q_gaussian = -0.5 * tf.reduce_sum(np.log(2 * np.pi) + tf.log(var_q) + norm_q**2, axis = [ 1 ])
+    log_p_gaussian = -0.5 * tf.reduce_mean(np.log(2 * np.pi) + tf.log(var_p) + norm_p**2, axis = [ 1 ])
+    log_q_gaussian = -0.5 * tf.reduce_mean(np.log(2 * np.pi) + tf.log(var_q) + norm_q**2, axis = [ 1 ])
+
+    ##########################
+    #### MEAN OR SUM ???? ####
+    ##########################
 
     KL = -(T_real_p - T_real_q + log_p_gaussian - log_q_gaussian)
 
@@ -301,8 +302,7 @@ def main(permutation, split, alpha, layers):
     ######################
 
 
-    ELBO = ( tf.reduce_sum( loss_train ) / tf.cast(n_samples, tf.float32) * tf.cast(size_train, tf.float32) / tf.cast(tf.shape(x)[ 0 ], tf.float32) - \
-        kl_factor_ * tf.reduce_mean( KL ) )
+    ELBO = tf.reduce_sum( loss_train ) - kl_factor_ * tf.reduce_mean( KL ) * tf.cast(tf.shape(x)[ 0 ], tf.float32) / tf.cast(size_train, tf.float32)
 
     neg_ELBO = -ELBO
     mean_ELBO = ELBO
@@ -341,6 +341,7 @@ def main(permutation, split, alpha, layers):
             ce_estimate_prior = 0.0
             ce_estimate_approx = 0.0
             kl = 0.0
+            loss = 0.0
 
             # Annealing factor for the KL term
             kl_factor = np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
@@ -348,6 +349,8 @@ def main(permutation, split, alpha, layers):
             # Train the model
             n_batches_train = int(np.ceil(size_train / n_batch))
             for i_batch in range(n_batches_train):
+
+                kl_factor = 1
 
                 ini = time.clock()
                 ini_ref = time.time()
@@ -357,6 +360,8 @@ def main(permutation, split, alpha, layers):
 
                 batch = [ X_train[ i_batch * n_batch : last_point, : ] , y_train[ i_batch * n_batch : last_point, ] ]
 
+                # import pdb; pdb.set_trace()
+
                 sess.run(train_step_disc_prior, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
                     kl_factor_: kl_factor})
                 sess.run(train_step_disc_approx, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
@@ -365,7 +370,8 @@ def main(permutation, split, alpha, layers):
                     kl_factor_: kl_factor})
 
                 # Overwrite the important quantities for the printed results
-                L += sess.run(mean_ELBO, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
+                L += sess.run(ELBO, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
+                loss += sess.run(tf.reduce_sum(loss_train), feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 kl += sess.run(mean_KL, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
                 ce_estimate_prior += sess.run(cross_entropy_p, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
                 ce_estimate_approx += sess.run(cross_entropy_q, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
@@ -379,7 +385,7 @@ def main(permutation, split, alpha, layers):
             fini_ref = time.time()
 
             # Store the training results while running
-            print("\n" + 'alpha %g datetime %s epoch %d ELBO %g KL %g real_time %g cpu_train_time %g annealing_factor %g' % (alpha, str(datetime.now()), epoch, L, kl, (fini_ref - ini_ref), (fini - ini), kl_factor))
+            print("\n" + 'alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor))
 
         import pdb; pdb.set_trace()
 
