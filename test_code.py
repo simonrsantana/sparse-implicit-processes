@@ -170,7 +170,7 @@ def main(permutation, split, alpha, layers):
     x = tf.placeholder(tf.float32, [ None, dim_data ])
     y_ = tf.placeholder(tf.float32, [ None, 1 ])
     n_samples = tf.placeholder(tf.int32, [ 1 ])[ 0 ]
-    kl_factor = tf.placeholder(tf.float32, [ 1 ])[ 0 ]
+    kl_factor_ = tf.placeholder(tf.float32, [ 1 ])[ 0 ]
 
 
     # Introduce the inducing points as variables initialized in a random subset of X
@@ -246,11 +246,10 @@ def main(permutation, split, alpha, layers):
     # samples_pf = mean_est +  tf.tensordot(cov_est, sample_pf_noise, axes = [[1], [0]])
     samples_pf = mean_est +  tf.matmul(cov_est, sample_pf_noise)                # Shape is (batchsize, n_samples)
 
-    # Estimate the log(p(f|y)) sample values
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 
     # Final loss for the data term
-    loss_train = (1.0/alpha) * ( -tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
+    loss_train = (1.0/alpha) * (-tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
 
 
     ###############
@@ -303,14 +302,14 @@ def main(permutation, split, alpha, layers):
 
 
     ELBO = ( tf.reduce_sum( loss_train ) / tf.cast(n_samples, tf.float32) * tf.cast(size_train, tf.float32) / tf.cast(tf.shape(x)[ 0 ], tf.float32) - \
-        kl_factor * tf.reduce_mean( KL ) )
+        kl_factor_ * tf.reduce_mean( KL ) )
 
     neg_ELBO = -ELBO
     mean_ELBO = ELBO
 
     mean_KL = tf.reduce_mean(KL)
 
-    vars_primal = get_variables_ns(neural_sampler) + get_variables_bnn(bnn) + log_sigma2_noise
+    vars_primal = get_variables_ns(neural_sampler) + get_variables_bnn(bnn) + [ log_sigma2_noise ]
     vars_disc_prior = get_variables_discriminator(discriminator_prior)
     vars_disc_approx = get_variables_discriminator(discriminator_approx)
 
@@ -321,15 +320,8 @@ def main(permutation, split, alpha, layers):
     # HAY ALGO MAL EN LOS SIGNOS Y LAS SUMAS DE LA ELBO, NECESITA REVISIÓN
 
 
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
 
-
-
-    # Create the variable lists to be updated
-
-
-    train_step_primal = tf.train.AdamOptimizer(primal_rate).minimize(main_loss, var_list = vars_primal)
-    train_step_dual = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_per_point, var_list = vars_dual)
 
     config = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1, \
         allow_soft_placement=True, device_count = {'CPU': 1})
@@ -344,12 +336,16 @@ def main(permutation, split, alpha, layers):
 
         for epoch in range(n_epochs):
 
+            # Initialize the containers for the needed quantities
             L = 0.0
-            ce_estimate = 0.0
+            ce_estimate_prior = 0.0
+            ce_estimate_approx = 0.0
             kl = 0.0
 
+            # Annealing factor for the KL term
             kl_factor = np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
 
+            # Train the model
             n_batches_train = int(np.ceil(size_train / n_batch))
             for i_batch in range(n_batches_train):
 
@@ -361,62 +357,72 @@ def main(permutation, split, alpha, layers):
 
                 batch = [ X_train[ i_batch * n_batch : last_point, : ] , y_train[ i_batch * n_batch : last_point, ] ]
 
-                sess.run(train_step_dual, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
+                sess.run(train_step_disc_prior, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
+                    kl_factor_: kl_factor})
+                sess.run(train_step_disc_approx, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
                     kl_factor_: kl_factor})
                 sess.run(train_step_primal, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
                     kl_factor_: kl_factor})
 
-                L += sess.run(mean_ELBO, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
-                    kl_factor_: kl_factor})
+                # Overwrite the important quantities for the printed results
+                L += sess.run(mean_ELBO, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 kl += sess.run(mean_KL, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
-                ce_estimate += sess.run(cross_entropy_per_point, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
+                ce_estimate_prior += sess.run(cross_entropy_p, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
+                ce_estimate_approx += sess.run(cross_entropy_q, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
 
                 sys.stdout.write('.')
                 sys.stdout.flush()
 
                 fini_train = time.clock()
 
-            # Test Evaluation
-
-            sys.stdout.write('\n')
-            ini_test = time.time()
-
-            # We do the test evaluation RMSE
-
-            errors = 0.0
-            LL  = 0.0
-            n_batches_to_process = int(np.ceil(X_test.shape[ 0 ] / n_batch))
-            for i in range(n_batches_to_process):
-
-                last_point = np.minimum(n_batch * (i + 1), X_test.shape[ 0 ])
-
-                batch = [ X_test[ i * n_batch : last_point, : ] , y_test[ i * n_batch : last_point, ] ]
-
-                errors += sess.run(squared_error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
-                LL += sess.run(log_prob_data, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
-
-            # error_class = errors / float(X_test.shape[ 0 ])
-            RMSE = np.sqrt(errors / n_batches_to_process)
-            TestLL = LL / n_batches_to_process
-
-
-            fini_test = time.time()
             fini = time.clock()
             fini_ref = time.time()
-            total_fini = time.time()
 
-            string = ('alpha %g batch %g datetime %s epoch %d ELBO %g CROSS-ENT %g KL %g real_time %g cpu_time %g ' + \
-                'train_time %g test_time %g total_time %g KL_factor %g LL %g RMSE %g') % \
-                (alpha, i_batch, str(datetime.now()), epoch, \
-                L / n_batches_train, ce_estimate / n_batches_train, kl / n_batches_train, (fini_ref - \
-                ini_ref), (fini - ini), (fini_train - ini_train), (fini_test - ini_test), (total_fini - total_ini), \
-                kl_factor, TestLL, RMSE)
-            print(string)
-            sys.stdout.flush()
+            # Store the training results while running
+            print("\n" + 'alpha %g datetime %s epoch %d ELBO %g KL %g real_time %g cpu_train_time %g annealing_factor %g' % (alpha, str(datetime.now()), epoch, L, kl, (fini_ref - ini_ref), (fini - ini), kl_factor))
 
-            L = 0.0
-            ce_estimate = 0.0
-            kl = 0.0
+        import pdb; pdb.set_trace()
+
+        # Test Evaluation
+        sys.stdout.write('\n')
+        ini_test = time.time()
+
+        # We do the test evaluation RMSE
+
+        errors = 0.0
+        LL  = 0.0
+        n_batches_to_process = int(np.ceil(X_test.shape[ 0 ] / n_batch))
+        for i in range(n_batches_to_process):
+
+            last_point = np.minimum(n_batch * (i + 1), X_test.shape[ 0 ])
+
+            batch = [ X_test[ i * n_batch : last_point, : ] , y_test[ i * n_batch : last_point, ] ]
+
+            errors += sess.run(squared_error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
+            LL += sess.run(log_prob_data, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
+
+        # error_class = errors / float(X_test.shape[ 0 ])
+        RMSE = np.sqrt(errors / n_batches_to_process)
+        TestLL = LL / n_batches_to_process
+
+
+        fini_test = time.time()
+        fini = time.clock()
+        fini_ref = time.time()
+        total_fini = time.time()
+
+        string = ('alpha %g batch %g datetime %s epoch %d ELBO %g CROSS-ENT %g KL %g real_time %g cpu_time %g ' + \
+            'train_time %g test_time %g total_time %g KL_factor %g LL %g RMSE %g') % \
+            (alpha, i_batch, str(datetime.now()), epoch, \
+            L / n_batches_train, ce_estimate / n_batches_train, kl / n_batches_train, (fini_ref - \
+            ini_ref), (fini - ini), (fini_train - ini_train), (fini_test - ini_test), (total_fini - total_ini), \
+            kl_factor, TestLL, RMSE)
+        print(string)
+        sys.stdout.flush()
+
+        L = 0.0
+        ce_estimate = 0.0
+        kl = 0.0
 
         np.savetxt('res_alpha/' + str(alpha) + 'results_error_' + str(split) + '_1layer.txt', [ RMSE ])
         np.savetxt('res_alpha/' + str(alpha) + 'results_ll_' + str(split) + '1layer.txt', [ TestLL ])
