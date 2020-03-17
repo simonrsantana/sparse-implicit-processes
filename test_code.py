@@ -202,10 +202,6 @@ def main(permutation, split, alpha, layers):
     fx = compute_samples_bnn(bnn, n_layers_bnn, x, n_samples, dim_data, bnn_structure)
     fz = compute_samples_bnn(bnn, n_layers_bnn, z, n_samples, dim_data, bnn_structure)
 
-    #########################################################################################
-    # THE INDUCING POINTS REMAIN TO BE DETERMINED STILL - SUBSET OF X (PLACEHOLDER FOR NOW) #
-    #########################################################################################
-
     # Means
     m_fx = mean_f(fx)
     m_fz = mean_f(fz)
