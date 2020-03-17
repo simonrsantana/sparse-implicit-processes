@@ -1,4 +1,4 @@
-### Code for VIP modified 
+### Code for VIP modified
 
 #### Structure of the code
 
@@ -12,5 +12,8 @@
 
 * **neural_sampler.py**: Creates the NS that will output samples from the approximating distribution. Using gaussian noise as input and processing it through a NN, samples of (u) are given (with shape defined through the calling of the function)
 
+* <em>**prints**</em>: This folder contains the prints of the training run of test.py
 
-Moreover, the code for AADM_class.py and first_test_code.py is included just for development issues, since they represent previous work on which the new code is based on. 
+**To run the code, do:** python test_code.py [split] [alpha value] [n_layers (1 or 2)] boston_housing.txt
+
+The rest of the codes included here, and additional folders that may appear are just auxiliary and extra material that aid to develop the main code, on which it is based on. 
