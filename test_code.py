@@ -50,11 +50,11 @@ seed = 123
 original_file = sys.argv[ 4 ]
 
 # This is the total number of training/test samples, epochs and batch sizes
-n_samples_train = 20
+n_samples_train = 10
 n_samples_test = 100
 
-n_batch = 100
-n_epochs = 100
+n_batch = 10
+n_epochs = 500
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
@@ -87,36 +87,10 @@ discriminator_structure = [50, 50]                  # Structure of the discrimin
 n_layers_disc = len(discriminator_structure)        # Number of layers in the discriminator
 
 
-###############################################################################
-##########################   Network structure  ###############################
-##############################################################################a
+#############################################################################################
+##########################   Main code - compute the results  ###############################
+#############################################################################################
 
-############################### GENERATOR ######################################
-
-
-# THERE IS NO NEED FOR A GENERATOR AS IS. ITS FUNCTION IS COVERED BY THE CODE IN
-# FILE neural_sampler.py WHERE SAMPLES FROM THE APPROXIMATING q(·) DISTRIBUTION
-# ARE OBTAINED
-
-
-############################# DISCRIMINATOR ####################################
-
-
-# THE DISCRIMINATORS ARE NOW INCLUDED IN THE disc_NN.py FILE, WHERE THERE ARE NOW
-# TWO OF THEM: ONE FOR THE APPROXIMATE DISTRIBUTION SAMPLES AND ANOTHER ONE FOR
-# SAMPLES FROM THE PRIOR DISTRIBUTION
-
-
-############################ MAIN NEURAL NETWORK ###############################
-
-
-#  NOW THIS IS DONE THROUGH THE BNN_prior.py CODE, CREATING THE NETWORK AND
-# SAMPLING FROM IT
-
-
-###############################################################################
-###############################################################################
-###############################################################################
 
 def main(permutation, split, alpha, layers):
 
@@ -237,13 +211,24 @@ def main(permutation, split, alpha, layers):
 
     sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
     # samples_pf = mean_est +  tf.tensordot(cov_est, sample_pf_noise, axes = [[1], [0]])
-    samples_pf = mean_est +  tf.matmul(cov_est, sample_pf_noise)                # Shape is (batchsize, n_samples)
+    samples_pf = mean_est +  tf.matmul(cov_est, sample_pf_noise)                # Shape is (batchsize, n_samples_train)
 
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 
     # Final loss for the data term
     loss_train = (1.0/alpha) * (-tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
 
+    # Compute the test metrics
+    unnorm_results = samples_pf * stdyTrain + meanyTrain    # Return the results to unnormalized values
+
+    # L.L.
+    raw_test_ll = tf.reduce_logsumexp( -0.5*(tf.log(2 * np.pi * log_sigma2_noise * stdyTrain**2) + (y_ - unnorm_results)**2 / (log_sigma2_noise * stdyTrain**2)), axis = [ 1 ]) - tf.log(tf.cast(n_samples, tf.float32))
+    test_ll_estimate = tf.reduce_sum( raw_test_ll )
+
+    # S.E.
+    squared_error = tf.reduce_sum( (tf.reduce_mean(unnorm_results, axis = [ 1 ]) - y_)**2 )
+
+    #import pdb; pdb.set_trace()
 
     ###############
     ### KL TERM ###
@@ -315,9 +300,8 @@ def main(permutation, split, alpha, layers):
 
     # import pdb; pdb.set_trace()
 
-
     config = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1, \
-        allow_soft_placement=True, device_count = {'CPU': 1})
+        allow_soft_placement=True, device_count = {'CPU': 3})
 
     with tf.Session(config = config) as sess:
 
@@ -347,7 +331,8 @@ def main(permutation, split, alpha, layers):
             n_batches_train = int(np.ceil(size_train / n_batch))
             for i_batch in range(n_batches_train):
 
-                kl_factor = 1
+                # To disable the effect of the annealing factor, uncomment the following line
+                # kl_factor = 1
 
                 last_point = np.minimum(n_batch * (i_batch + 1), size_train)
 
@@ -381,10 +366,10 @@ def main(permutation, split, alpha, layers):
             sys.stdout.flush()
 
             # Store the training results while running
-            with open("prints/print_IPs_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
+            with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor) + "\n")
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         # Test Evaluation
         sys.stdout.write('\n')
@@ -402,7 +387,7 @@ def main(permutation, split, alpha, layers):
             batch = [ X_test[ i * n_batch : last_point, : ] , y_test[ i * n_batch : last_point, ] ]
 
             errors += sess.run(squared_error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
-            LL += sess.run(log_prob_data, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
+            LL += sess.run(test_ll_estimate, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
 
         # error_class = errors / float(X_test.shape[ 0 ])
         RMSE = np.sqrt(errors / n_batches_to_process)
@@ -410,12 +395,13 @@ def main(permutation, split, alpha, layers):
 
         # fini_test = time.time()
 
-        L = 0.0
-        ce_estimate = 0.0
-        kl = 0.0
+        # Print the results and save them
+        with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
+            res_file.write("\n" + 'LL %g RMSE %g' % (TestLL, RMSE))
 
-        np.savetxt('res_alpha/' + str(alpha) + 'results_error_' + str(split) + '_1layer.txt', [ RMSE ])
-        np.savetxt('res_alpha/' + str(alpha) + 'results_ll_' + str(split) + '1layer.txt', [ TestLL ])
+
+        np.savetxt('res_IP/' + str(alpha) + '_rmse_' + str(split) + '.txt', [ RMSE ])
+        np.savetxt('res_IP/' + str(alpha) + '_ll_' + str(split) + '.txt', [ TestLL ])
 
 
 if __name__ == '__main__':
@@ -433,12 +419,12 @@ if __name__ == '__main__':
         os.makedirs("prints")
 
     # Create a file to store the results of the run (or empty the previously existing one)
-    if os.path.isfile("prints/print_IPs_" + str(alpha) + "_" + str(split) + "_" +  original_file):
-        with open("prints/print_IPs_" + str(alpha) + "_" + str(split) + "_" +  original_file, "w") as res_file:
+    if os.path.isfile("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file):
+        with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "w") as res_file:
            res_file.close()
 
     # Create the folder to save all the results
-    if not os.path.isdir("res_alpha"):
-        os.makedirs("res_alpha")
+    if not os.path.isdir("res_IP"):
+        os.makedirs("res_IP")
 
     main(available_perm[split,], split, alpha, layers)
