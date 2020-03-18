@@ -19,7 +19,7 @@ import numpy as np
 
 
 # =============================================================================
-# We define the following two functions to simplify the rest of the code
+#    We define the following two functions to simplify the rest of the code
 # =============================================================================
 
 def w_variable_mean(shape):
@@ -209,14 +209,20 @@ def main(permutation, split, alpha, layers):
     mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])     # Missing the mean of the evaluated points thus far
     cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
 
+    # import pdb; pdb.set_trace()
+
     sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
     # samples_pf = mean_est +  tf.tensordot(cov_est, sample_pf_noise, axes = [[1], [0]])
-    samples_pf = mean_est +  tf.matmul(cov_est, sample_pf_noise)                # Shape is (batchsize, n_samples_train)
+    samples_pf = mean_est +  tf.matmul(tf.linalg.cholesky(cov_est+ tf.eye(tf.shape(cov_est)[ 0 ]) * 1e-4), sample_pf_noise)                # Shape is (batchsize, n_samples_train)
+
+    #################################################################################
+    ###### LA DESCOMPOSICIÓN DE CHOLESKY NO PARECE FUNCIONAR DE FORMA ESTABLE #######
+    #################################################################################
 
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 
     # Final loss for the data term
-    loss_train = (1.0/alpha) * (-tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
+    loss_train = (1.0/alpha) * ( -tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
 
     # Compute the test metrics
     unnorm_results = samples_pf * stdyTrain + meanyTrain    # Return the results to unnormalized values
@@ -224,6 +230,8 @@ def main(permutation, split, alpha, layers):
     # L.L.
     raw_test_ll = tf.reduce_logsumexp( -0.5*(tf.log(2 * np.pi * log_sigma2_noise * stdyTrain**2) + (y_ - unnorm_results)**2 / (log_sigma2_noise * stdyTrain**2)), axis = [ 1 ]) - tf.log(tf.cast(n_samples, tf.float32))
     test_ll_estimate = tf.reduce_sum( raw_test_ll )
+
+    # import pdb; pdb.set_trace()
 
     # S.E.
     squared_error = tf.reduce_sum( (tf.reduce_mean(unnorm_results, axis = [ 1 ]) - y_)**2 )
@@ -268,14 +276,11 @@ def main(permutation, split, alpha, layers):
     cross_entropy_q = (q_loss_real + q_loss_sampled) / 2.0
 
     # Calculate the rest of the KL terms
-    log_p_gaussian = -0.5 * tf.reduce_mean(np.log(2 * np.pi) + tf.log(var_p) + norm_p**2, axis = [ 1 ])
-    log_q_gaussian = -0.5 * tf.reduce_mean(np.log(2 * np.pi) + tf.log(var_q) + norm_q**2, axis = [ 1 ])
+    log_p_gaussian = -0.5 * tf.reduce_sum(np.log(2 * np.pi) + tf.log(var_p) + norm_p**2, axis = [ 1 ])
+    log_q_gaussian = -0.5 * tf.reduce_sum(np.log(2 * np.pi) + tf.log(var_q) + norm_q**2, axis = [ 1 ])
 
-    ##########################
-    #### MEAN OR SUM ???? ####
-    ##########################
-
-    KL = T_real_p - T_real_q + log_p_gaussian - log_q_gaussian
+    # Final expression of the KL divergence, combining both discriminators
+    KL = T_real_q - T_real_p + log_q_gaussian - log_p_gaussian
 
 
     ######################
@@ -362,12 +367,14 @@ def main(permutation, split, alpha, layers):
             fini = time.clock()
             fini_ref = time.time()
 
+            sys.stdout.write(" epoch " + str(epoch))
+
             sys.stdout.write('\n')
             sys.stdout.flush()
 
             # Store the training results while running
             with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
-                res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor) + "\n")
+                res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
         # import pdb; pdb.set_trace()
 
@@ -385,6 +392,8 @@ def main(permutation, split, alpha, layers):
             last_point = np.minimum(n_batch * (i + 1), X_test.shape[ 0 ])
 
             batch = [ X_test[ i * n_batch : last_point, : ] , y_test[ i * n_batch : last_point, ] ]
+
+            import pdb; pdb.set_trace()
 
             errors += sess.run(squared_error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
             LL += sess.run(test_ll_estimate, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
