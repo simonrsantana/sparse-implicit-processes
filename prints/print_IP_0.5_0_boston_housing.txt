@@ -1,0 +1,30 @@
+alpha 0.5 datetime 2020-03-24 17:43:32.615296 epoch 0 ELBO 790.026 Loss -688.373 KL 493.955 real_time 2.09162 cpu_train_time 4.27 annealing_factor 1 C.E.(p) 3.47766 C.E.(q) 3.48598
+alpha 0.5 datetime 2020-03-24 17:43:34.391431 epoch 1 ELBO 775.758 Loss -681.089 KL 458.881 real_time 1.77589 cpu_train_time 3.89693 annealing_factor 1 C.E.(p) 3.51023 C.E.(q) 3.2821
+alpha 0.5 datetime 2020-03-24 17:43:36.167352 epoch 2 ELBO 754.01 Loss -683.568 KL 447.218 real_time 1.77568 cpu_train_time 3.93624 annealing_factor 1 C.E.(p) 3.50441 C.E.(q) 2.97591
+alpha 0.5 datetime 2020-03-24 17:43:37.869709 epoch 3 ELBO 749.874 Loss -671.096 KL 390.605 real_time 1.70207 cpu_train_time 3.81761 annealing_factor 1 C.E.(p) 3.47489 C.E.(q) 2.69209
+alpha 0.5 datetime 2020-03-24 17:43:39.615238 epoch 4 ELBO 734.876 Loss -663.563 KL 353.259 real_time 1.74529 cpu_train_time 3.9182 annealing_factor 1 C.E.(p) 3.48041 C.E.(q) 2.10317
+alpha 0.5 datetime 2020-03-24 17:43:41.360161 epoch 5 ELBO 716.851 Loss -668.458 KL 340.826 real_time 1.74463 cpu_train_time 3.86376 annealing_factor 1 C.E.(p) 3.45189 C.E.(q) 2.16923
+alpha 0.5 datetime 2020-03-24 17:43:43.129845 epoch 6 ELBO 711.738 Loss -646.747 KL 297.38 real_time 1.76942 cpu_train_time 3.87625 annealing_factor 1 C.E.(p) 3.47 C.E.(q) 1.36599
+alpha 0.5 datetime 2020-03-24 17:43:44.952505 epoch 7 ELBO 698.978 Loss -645.62 KL 289.78 real_time 1.82243 cpu_train_time 3.98463 annealing_factor 1 C.E.(p) 3.51435 C.E.(q) 1.28651
+alpha 0.5 datetime 2020-03-24 17:43:46.761609 epoch 8 ELBO 694.444 Loss -638.34 KL 274.516 real_time 1.80877 cpu_train_time 3.95772 annealing_factor 1 C.E.(p) 3.44126 C.E.(q) 0.582043
+alpha 0.5 datetime 2020-03-24 17:43:48.534821 epoch 9 ELBO 680.481 Loss -636.363 KL 253.625 real_time 1.77299 cpu_train_time 3.92447 annealing_factor 1 C.E.(p) 3.48834 C.E.(q) 0.891966
+alpha 0.5 datetime 2020-03-24 17:43:50.299169 epoch 10 ELBO 667.856 Loss -626.535 KL 247.092 real_time 1.76414 cpu_train_time 3.8728 annealing_factor 1 C.E.(p) 3.4763 C.E.(q) 0.974846
+alpha 0.5 datetime 2020-03-24 17:43:52.085888 epoch 11 ELBO 666.654 Loss -616.707 KL 215.249 real_time 1.7865 cpu_train_time 3.91451 annealing_factor 1 C.E.(p) 3.50158 C.E.(q) 1.01365
+alpha 0.5 datetime 2020-03-24 17:43:53.899431 epoch 12 ELBO 657.271 Loss -613.387 KL 209.497 real_time 1.8133 cpu_train_time 3.91593 annealing_factor 1 C.E.(p) 3.48357 C.E.(q) 0.687957
+alpha 0.5 datetime 2020-03-24 17:43:55.702512 epoch 13 ELBO 642.776 Loss -610.17 KL 158.042 real_time 1.80283 cpu_train_time 3.9411 annealing_factor 1 C.E.(p) 3.41819 C.E.(q) 1.05272
+alpha 0.5 datetime 2020-03-24 17:43:57.565527 epoch 14 ELBO 633.015 Loss -605.281 KL 180.456 real_time 1.86273 cpu_train_time 3.99175 annealing_factor 1 C.E.(p) 3.45938 C.E.(q) 1.06854
+alpha 0.5 datetime 2020-03-24 17:43:59.418295 epoch 15 ELBO 618.266 Loss -600.884 KL 135.025 real_time 1.85251 cpu_train_time 4.00903 annealing_factor 1 C.E.(p) 3.46757 C.E.(q) 1.4578
+alpha 0.5 datetime 2020-03-24 17:44:01.263651 epoch 16 ELBO 618.234 Loss -593.277 KL 131.204 real_time 1.84511 cpu_train_time 3.98041 annealing_factor 1 C.E.(p) 3.58475 C.E.(q) 0.609536
+alpha 0.5 datetime 2020-03-24 17:44:03.074182 epoch 17 ELBO 605.199 Loss -590.271 KL 117.585 real_time 1.81029 cpu_train_time 3.92294 annealing_factor 1 C.E.(p) 3.44403 C.E.(q) 0.761461
+alpha 0.5 datetime 2020-03-24 17:44:04.875721 epoch 18 ELBO 604.667 Loss -586.514 KL 90.3576 real_time 1.80129 cpu_train_time 3.8763 annealing_factor 1 C.E.(p) 3.44981 C.E.(q) 0.420893
+alpha 0.5 datetime 2020-03-24 17:44:06.671124 epoch 19 ELBO 595.824 Loss -582.618 KL 90.0331 real_time 1.79511 cpu_train_time 3.87856 annealing_factor 1 C.E.(p) 3.46894 C.E.(q) 0.532849
+alpha 0.5 datetime 2020-03-24 17:44:08.511570 epoch 20 ELBO 593.64 Loss -573.628 KL 61.2492 real_time 1.84018 cpu_train_time 3.96167 annealing_factor 1 C.E.(p) 3.42931 C.E.(q) 0.376227
+alpha 0.5 datetime 2020-03-24 17:44:10.318763 epoch 21 ELBO 582.952 Loss -572.938 KL 62.1155 real_time 1.80695 cpu_train_time 3.88293 annealing_factor 1 C.E.(p) 3.50021 C.E.(q) 0.213957
+alpha 0.5 datetime 2020-03-24 17:44:12.199758 epoch 22 ELBO 576.09 Loss -571.354 KL 55.5758 real_time 1.88074 cpu_train_time 3.92914 annealing_factor 1 C.E.(p) 3.494 C.E.(q) 0.314519
+alpha 0.5 datetime 2020-03-24 17:44:14.027644 epoch 23 ELBO 575.285 Loss -565.232 KL 42.563 real_time 1.82766 cpu_train_time 3.96406 annealing_factor 1 C.E.(p) 3.49025 C.E.(q) 0.385943
+alpha 0.5 datetime 2020-03-24 17:44:15.868503 epoch 24 ELBO 563.226 Loss -554.813 KL 29.5658 real_time 1.84061 cpu_train_time 3.94682 annealing_factor 1 C.E.(p) 3.46699 C.E.(q) 0.153001
+alpha 0.5 datetime 2020-03-24 17:44:17.722732 epoch 25 ELBO 555.929 Loss -551.629 KL 6.22505 real_time 1.85392 cpu_train_time 3.95207 annealing_factor 1 C.E.(p) 3.46735 C.E.(q) 0.426279
+alpha 0.5 datetime 2020-03-24 17:44:19.561426 epoch 26 ELBO 552.811 Loss -547.943 KL 38.4554 real_time 1.83845 cpu_train_time 3.95344 annealing_factor 1 C.E.(p) 3.47761 C.E.(q) 0.0489457
+alpha 0.5 datetime 2020-03-24 17:44:21.399265 epoch 27 ELBO 554.701 Loss -542.727 KL -3.30802 real_time 1.83753 cpu_train_time 3.9739 annealing_factor 1 C.E.(p) 3.46106 C.E.(q) 0.319106
+
+THE KL HAS BECOME NEGATIVE, THERE IS AN ERROR SOMEWHERE IN THE OBJECTIVE FUNCTIONS
