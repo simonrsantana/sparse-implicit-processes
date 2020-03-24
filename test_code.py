@@ -53,7 +53,7 @@ original_file = sys.argv[ 4 ]
 n_samples_train = 10
 n_samples_test = 100
 
-n_batch = 10
+n_batch = 100
 n_epochs = 500
 
 ratio_train = 0.9 # Percentage of the data devoted to train
@@ -65,8 +65,8 @@ number_IP = 50
 kl_factor_limit = int(n_epochs / 10)
 
 # Learning rates
-primal_rate = 1e-4 # Main BNN and neural sampler parameters
-dual_rate = 1e-3   # Discriminators
+primal_rate = 1e-3 # Main BNN and neural sampler parameters
+dual_rate = 1e-2   # Discriminators
 
 
 # STRUCTURE OF ALL THE NNs IN THE SYSTEM
@@ -189,6 +189,8 @@ def main(permutation, split, alpha, layers):
     K_xz = calculate_covariances(delta_fx, delta_fz)    # dim = (batchsize(x), batchsize(z))
     K_zz = calculate_covariances(delta_fz, delta_fz)
 
+    # import pdb; pdb.set_trace()
+
     additive_factor = 1e-5
     inv_K_zz = K_zz + tf.eye(tf.shape(K_zz)[ 0 ]) * additive_factor   # To ensure it is invertible we add a small noise
 
@@ -204,20 +206,15 @@ def main(permutation, split, alpha, layers):
     cov_product = tf.matmul(K_xz, inv_term)
 
     #### WE ARE DOING THE MEAN THROUGH THE SAMPLES OF f(z) (= u)
-    # mean_est = tf.reduce_mean( tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]]), axis = 1)
     # Instead of using u from the prior p(·), we use u from the approximate distribution q(·) for the differences in the expression
-    mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])     # Missing the mean of the evaluated points thus far
-    cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
+    mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])   # Dimensions: first term: (batchsize, 1); sec. term: (batchsize, n_samples)
+    cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )         # THIS MATRIX IS PRACTICALLY ZERO IN ALL ENTRIES ??????
 
     # import pdb; pdb.set_trace()
 
     sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
     # samples_pf = mean_est +  tf.tensordot(cov_est, sample_pf_noise, axes = [[1], [0]])
-    samples_pf = mean_est +  tf.matmul(tf.linalg.cholesky(cov_est+ tf.eye(tf.shape(cov_est)[ 0 ]) * 1e-4), sample_pf_noise)                # Shape is (batchsize, n_samples_train)
-
-    #################################################################################
-    ###### LA DESCOMPOSICIÓN DE CHOLESKY NO PARECE FUNCIONAR DE FORMA ESTABLE #######
-    #################################################################################
+    samples_pf = mean_est +  tf.matmul(tf.linalg.cholesky(cov_est+ tf.eye(tf.shape(cov_est)[ 0 ]) * 1e-2), sample_pf_noise)                # Shape is (batchsize, n_samples_train)
 
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 
@@ -250,8 +247,8 @@ def main(permutation, split, alpha, layers):
     tf.stop_gradient(mean_q); tf.stop_gradient(var_q);
 
     # Normalize the samples
-    norm_p = (tf.transpose(fz) - mean_p) / var_p
-    norm_q = (tf.transpose(samples_qu) - mean_q) / var_q
+    norm_p = (tf.transpose(fz) - mean_p) / tf.sqrt(var_p)
+    norm_q = (tf.transpose(samples_qu) - mean_q) / tf.sqrt(var_q)
 
     # Construct the auxiliar gaussian distributions
     samples_p_gaussian = tf.random_normal(shape = tf.shape(norm_p), mean = 0, stddev = 1)  #, seed = seed)
@@ -268,8 +265,8 @@ def main(permutation, split, alpha, layers):
     p_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_real_p, labels=tf.ones_like(T_real_p)))
     p_loss_sampled = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_sampled_p, labels=tf.zeros_like(T_sampled_p)))
 
-    q_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_real_q, labels=tf.ones_like(T_real_q)))
-    q_loss_sampled = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_sampled_q, labels=tf.zeros_like(T_sampled_q)))
+    q_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_real_q, labels= tf.ones_like(T_real_q) ))
+    q_loss_sampled = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=T_sampled_q, labels= tf.zeros_like(T_sampled_q) ))
 
     # CE per point
     cross_entropy_p = (p_loss_real + p_loss_sampled) / 2.0
@@ -278,6 +275,8 @@ def main(permutation, split, alpha, layers):
     # Calculate the rest of the KL terms
     log_p_gaussian = -0.5 * tf.reduce_sum(np.log(2 * np.pi) + tf.log(var_p) + norm_p**2, axis = [ 1 ])
     log_q_gaussian = -0.5 * tf.reduce_sum(np.log(2 * np.pi) + tf.log(var_q) + norm_q**2, axis = [ 1 ])
+
+    # logr = -0.5 * tf.reduce_sum(norm_weights_train**2 + tf.log(var_w_train) + np.log(2*np.pi), [ 2 ])
 
     # Final expression of the KL divergence, combining both discriminators
     KL = T_real_q - T_real_p + log_q_gaussian - log_p_gaussian
@@ -288,7 +287,7 @@ def main(permutation, split, alpha, layers):
     ######################
 
 
-    ELBO = tf.reduce_sum( loss_train ) - kl_factor_ * tf.reduce_mean( KL ) * tf.cast(tf.shape(x)[ 0 ], tf.float32) / tf.cast(size_train, tf.float32)
+    ELBO =  tf.reduce_sum( loss_train ) - kl_factor_ * tf.reduce_mean( KL ) * tf.cast(tf.shape(x)[ 0 ], tf.float32) / tf.cast(size_train, tf.float32)
 
     neg_ELBO = -ELBO
     mean_ELBO = ELBO
@@ -305,7 +304,7 @@ def main(permutation, split, alpha, layers):
 
     # import pdb; pdb.set_trace()
 
-    config = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1, \
+    config = tf.ConfigProto(intra_op_parallelism_threads=3, inter_op_parallelism_threads=3, \
         allow_soft_placement=True, device_count = {'CPU': 3})
 
     with tf.Session(config = config) as sess:
@@ -326,7 +325,7 @@ def main(permutation, split, alpha, layers):
             loss = 0.0
 
             # Annealing factor for the KL term
-            kl_factor = np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
+            kl_factor = 1.0#  np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
 
             ini = time.clock()
             ini_ref = time.time()
@@ -353,7 +352,7 @@ def main(permutation, split, alpha, layers):
                     kl_factor_: kl_factor})
 
                 # Overwrite the important quantities for the printed results
-                L += sess.run(ELBO, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
+                L += sess.run(neg_ELBO, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 loss += sess.run(tf.reduce_sum(loss_train), feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 kl += sess.run(mean_KL, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
                 ce_estimate_prior += sess.run(cross_entropy_p, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
@@ -372,9 +371,17 @@ def main(permutation, split, alpha, layers):
             sys.stdout.write('\n')
             sys.stdout.flush()
 
+            print('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx))
+
+
             # Store the training results while running
             with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
+
+
+            if kl < 0:
+                print(" ERROR IN THE CONSTRUCTION OF THE OBJECTIVE FUNCTION ")
+                import pdb; pdb.set_trace()
 
         # import pdb; pdb.set_trace()
 
@@ -393,7 +400,7 @@ def main(permutation, split, alpha, layers):
 
             batch = [ X_test[ i * n_batch : last_point, : ] , y_test[ i * n_batch : last_point, ] ]
 
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
 
             errors += sess.run(squared_error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
             LL += sess.run(test_ll_estimate, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]

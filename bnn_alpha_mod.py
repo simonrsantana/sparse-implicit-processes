@@ -578,6 +578,8 @@ def main(permutation, split, alpha, layers):
 #                sess.run(train_step_dual, feed_dict={x: batch[0], y_: batch[1]})
 #                sess.run(train_step_primal, feed_dict={x: batch[0], y_: batch[1]})
 
+                import pdb; pdb.set_trace()
+
                 value = sess.run(mean_ELBO, feed_dict={x: batch[0], y_: batch[1], ladder: ladder_value})
                 kl = sess.run(mean_KL, feed_dict={x: batch[0], y_: batch[1], ladder: ladder_value})
 
