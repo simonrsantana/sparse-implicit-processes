@@ -1,0 +1,3 @@
+alpha 0.5 datetime 2020-03-25 13:34:29.411715 epoch 0 ELBO 2719.05 Loss -2662.32 KL 861.629 real_time 6.0736 cpu_train_time 11.5479 annealing_factor 1 C.E.(p) 12.5396 C.E.(q) 11.4552
+alpha 0.5 datetime 2020-03-25 13:34:35.840536 epoch 1 ELBO 2616.66 Loss -2606.96 KL 295.067 real_time 6.42857 cpu_train_time 11.6914 annealing_factor 1 C.E.(p) 12.521 C.E.(q) 6.82126
+alpha 0.5 datetime 2020-03-25 13:34:42.073635 epoch 2 ELBO 2562.18 Loss -2566.18 KL -12.4202 real_time 6.23291 cpu_train_time 11.6245 annealing_factor 1 C.E.(p) 12.5235 C.E.(q) 3.81452
