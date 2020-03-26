@@ -62,7 +62,7 @@ ratio_train = 0.9 # Percentage of the data devoted to train
 number_IP = 50
 
 # Parameters concerning the annealing factor of the KL divergence
-kl_factor_limit = int(n_epochs / 10)
+kl_factor_limit = int(n_epochs / 20)
 
 # Learning rates
 primal_rate = 1e-3 # Main BNN and neural sampler parameters
@@ -325,7 +325,7 @@ def main(permutation, split, alpha, layers):
             loss = 0.0
 
             # Annealing factor for the KL term
-            kl_factor = 1.0#  np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
+            kl_factor =  np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
 
             ini = time.clock()
             ini_ref = time.time()
@@ -379,8 +379,8 @@ def main(permutation, split, alpha, layers):
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
 
-            if kl < 0:
-                print(" ERROR IN THE CONSTRUCTION OF THE OBJECTIVE FUNCTION ")
+            if epoch == 26:
+                # print(" ERROR IN THE CONSTRUCTION OF THE OBJECTIVE FUNCTION ")
                 import pdb; pdb.set_trace()
 
         # import pdb; pdb.set_trace()
