@@ -82,27 +82,26 @@ def compute_samples_bnn(prior_network, n_layers, data, n_samples, dim_data, prio
 
     # Extract the weights' moments and the (not random) biases
     W1_mean_prior = tf.reshape(prior_network['W1_mean_prior'], shape = [1, 1, n_units1, dim_data])
-    W1_sigma2_prior = tf.reshape( tf.exp( prior_network['W1_log_sigma2_prior'] ), shape = [1, 1, n_units1, dim_data])
+    W1_sigma2_prior = tf.reshape( tf.exp( prior_network['W1_log_sigma2_prior'] ), shape = [n_units1, dim_data])
     bias1_prior =  prior_network['bias1_prior']
 
     W2_mean_prior = tf.reshape( prior_network['W2_mean_prior'], shape = [ 1, 1, n_units1, n_units2 ])
-    W2_sigma2_prior = tf.reshape( tf.exp( prior_network['W2_log_sigma2_prior'] ), shape = [ 1, 1, n_units1, n_units2 ])
+    W2_sigma2_prior = tf.reshape( tf.exp( prior_network['W2_log_sigma2_prior'] ), shape = [n_units1, n_units2 ])
     bias2_prior =  prior_network['bias2_prior']
 
     W3_mean_prior = tf.reshape( prior_network['W3_mean_prior'], shape = [ 1, 1, n_units2, 1 ])
-    W3_sigma2_prior = tf.reshape( tf.exp( prior_network['W3_log_sigma2_prior'] ), shape = [ 1, 1, n_units2, 1 ])
+    W3_sigma2_prior = tf.reshape( tf.exp( prior_network['W3_log_sigma2_prior'] ), shape = [n_units2, 1 ])
     bias3_prior =  prior_network['bias3_prior']
 
 
     # Sample random noise for the sampling of the activations
-    noise_1_x = tf.random_normal(shape = [ batch_size, n_samples, n_units1 ]) #, seed = seed)
-    noise_2_x = tf.random_normal(shape = [ batch_size, n_samples, n_units2 ]) #, seed = seed)
-    noise_3_x = tf.random_normal(shape = [ batch_size, n_samples, 1 ]) #, seed = seed)
+    noise_1 = tf.random_normal(shape = [ n_samples, n_units1 ]) #, seed = seed)
+    noise_2 = tf.random_normal(shape = [ n_samples, n_units2 ]) #, seed = seed)
+    noise_3 = tf.random_normal(shape = [ n_samples, 1 ]) #, seed = seed)
 
-    noise_1_z = tf.random_normal(shape = [ number_ips, n_samples, n_units1 ]) #, seed = seed)
-    noise_2_z = tf.random_normal(shape = [ number_ips, n_samples, n_units2 ]) #, seed = seed)
-    noise_3_z = tf.random_normal(shape = [ number_ips, n_samples, 1 ]) #, seed = seed)
-
+    import pdb; pdb.set_trace()
+    # Construct the weights
+    W1 = W1_mean_prior + W2_sigma2_prior * noise_1
 
     # import pdb; pdb.set_trace()
 
@@ -114,6 +113,8 @@ def compute_samples_bnn(prior_network, n_layers, data, n_samples, dim_data, prio
     diff_1_x = tf.reduce_sum( tf.math.square( x_expanded ) * W1_sigma2_prior, axis = 3)
     gamma_1_z = tf.reduce_sum( z_expanded * W1_mean_prior, axis = 3)
     diff_1_z = tf.reduce_sum( tf.math.square( z_expanded ) * W1_sigma2_prior, axis = 3)
+
+
 
     A1_x = (gamma_1_x + bias1_prior) + tf.math.multiply(tf.math.sqrt(diff_1_x), noise_1_x) # Local reparam. trick first layer
     h1_x = tf.nn.leaky_relu(A1_x) # h1 is batch_size x n_samples x n_units

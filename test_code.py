@@ -16,6 +16,8 @@ import random
 
 import tensorflow as tf
 import numpy as np
+import pandas as pd
+
 
 
 # =============================================================================
@@ -27,13 +29,14 @@ def w_variable_mean(shape):
   return tf.Variable(initial)
 
 def w_variable_variance(shape):
-  initial = tf.random_normal(shape = shape, stddev = 0.1, seed = seed) - 5.0 # mean 0 stddev 1
+  initial = tf.random_normal(shape = shape, stddev = 0.1, seed = seed) - 5 # mean 0 stddev 1
   return tf.Variable(initial)
 
 
 # Import relevant functions concerning the different distributions of the model
 from aux_functions import *         # Functions that calculate moments given sampled values
-from BNN_prior import *             # Prior BNN model functions
+# from BNN_prior import *
+from alternative_BNN_prior import *             # Prior BNN model functions
 from neural_sampler import *        # Neural sampler that draws instances from q(·)
 from discriminators import *        # NNs that discriminate samples between distributions
 
@@ -120,8 +123,13 @@ def main(permutation, split, alpha, layers):
 
     X_train = X[ index_train, : ]
     y_train = np.vstack(y[ index_train ])
-    X_test = X[ index_test, : ]
-    y_test = np.vstack(y[ index_test ])
+
+    #X_test = X[ index_test, : ]
+    #y_test = np.vstack(y[ index_test ])
+
+    data_test = np.loadtxt("synthetic_cases/synth_data_biased_heteroc_test.txt").astype(np.float32)
+    X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
+    y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
 
     # Normalizamos los argumentos
 
@@ -171,10 +179,11 @@ def main(permutation, split, alpha, layers):
     discriminator_approx = create_discriminator(discriminator_structure, number_IP, n_layers_disc)
     bnn = create_bnn(dim_data, bnn_structure, n_layers_bnn)
 
-
+    # import pdb; pdb.set_trace()
     # Obtain values for the functions sampled at the points
-    fx = compute_samples_bnn(bnn, n_layers_bnn, x, n_samples, dim_data, bnn_structure)
-    fz = compute_samples_bnn(bnn, n_layers_bnn, z, n_samples, dim_data, bnn_structure)
+    fx, fz = compute_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
+    #fx, fz = compute_merged_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
+    # fz = compute_samples_bnn(bnn, n_layers_bnn, z, n_samples, dim_data, bnn_structure)
 
     # Means
     m_fx = mean_f(fx)
@@ -379,7 +388,7 @@ def main(permutation, split, alpha, layers):
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
 
-            if epoch == 26:
+            if epoch >= 20:
                 # print(" ERROR IN THE CONSTRUCTION OF THE OBJECTIVE FUNCTION ")
                 import pdb; pdb.set_trace()
 
@@ -418,6 +427,13 @@ def main(permutation, split, alpha, layers):
 
         np.savetxt('res_IP/' + str(alpha) + '_rmse_' + str(split) + '.txt', [ RMSE ])
         np.savetxt('res_IP/' + str(alpha) + '_ll_' + str(split) + '.txt', [ TestLL ])
+
+
+        input, results, labels = sess.run([x, unnorm_results, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
+
+        merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
+
+        merge.to_csv("res_IP/truncated_biased_heteroc_IPs.csv", index = False)
 
 
 if __name__ == '__main__':
