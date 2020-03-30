@@ -22,4 +22,4 @@ The rest of the codes included here, and additional folders that may appear are 
 ### EXAMPLE OF SYNTHETIC DATASET:
 
 This shows that the method is not learning properly. On black we have the real data, on red the estimates of the method, whose means are represented as blue crosses (for each x_test given).
-<img src="synthetic_cases/sine_biased_heteroc.png" alt="Results estimated in the heterocedastic and biased synthetic problem" width="650"/>
+<img src="synthetic_cases/fx_estimates_comparison(merged).png" alt="Results estimated in the heterocedastic and biased synthetic problem" width="650"/>

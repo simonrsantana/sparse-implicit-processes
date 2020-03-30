@@ -2,6 +2,7 @@
 setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/synthetic_cases/")
 set.seed(123)
 samples = 2000
+error_factor = 0
 
 # Heterocedastic problem
 min_x = -4
@@ -10,7 +11,7 @@ max_x = 4
 x <- runif(samples, min = min_x, max = max_x)
 
 eps_2 <- rnorm(samples, sd = 2)
-y2 <- 7 * sin(x) +10 + eps_2 * sin(x) 
+y2 <- 7 * sin(x) +10 + eps_2 * sin(x) * error_factor
 
 data_2 <- data.frame(x = x, y = y2)
 
@@ -34,7 +35,7 @@ write.table(x = data_2, file = "synth_data_biased_heteroc.txt", col.names = F, r
 
 x_test <- seq(min_x, max_x, by = 0.1)
 eps_test <- rnorm(length(x_test), sd = 2)
-y_test <- 7 * sin(x_test) +10 + eps_test * sin(x_test) 
+y_test <- 7 * sin(x_test) +10 + eps_test * sin(x_test) * error_factor
 
 data_test <- data.frame(x = x_test, y = y_test)
 

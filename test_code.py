@@ -35,8 +35,8 @@ def w_variable_variance(shape):
 
 # Import relevant functions concerning the different distributions of the model
 from aux_functions import *         # Functions that calculate moments given sampled values
-# from BNN_prior import *
-from alternative_BNN_prior import *             # Prior BNN model functions
+from BNN_prior import *
+# from alternative_BNN_prior import *             # Prior BNN model functions
 from neural_sampler import *        # Neural sampler that draws instances from q(·)
 from discriminators import *        # NNs that discriminate samples between distributions
 
@@ -57,7 +57,7 @@ n_samples_train = 10
 n_samples_test = 100
 
 n_batch = 100
-n_epochs = 500
+n_epochs = 100
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
@@ -181,8 +181,8 @@ def main(permutation, split, alpha, layers):
 
     # import pdb; pdb.set_trace()
     # Obtain values for the functions sampled at the points
-    fx, fz = compute_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
-    #fx, fz = compute_merged_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
+    # fx, fz = compute_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
+    fx, fz = compute_merged_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
     # fz = compute_samples_bnn(bnn, n_layers_bnn, z, n_samples, dim_data, bnn_structure)
 
     # Means
@@ -303,7 +303,7 @@ def main(permutation, split, alpha, layers):
 
     mean_KL = tf.reduce_mean(KL)
 
-    vars_primal = get_variables_ns(neural_sampler) + get_variables_bnn(bnn) + [ log_sigma2_noise ]
+    vars_primal = get_variables_ns(neural_sampler) + get_variables_bnn(bnn) + [ log_sigma2_noise, z ]
     vars_disc_prior = get_variables_discriminator(discriminator_prior)
     vars_disc_approx = get_variables_discriminator(discriminator_approx)
 
@@ -364,8 +364,8 @@ def main(permutation, split, alpha, layers):
                 L += sess.run(neg_ELBO, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 loss += sess.run(tf.reduce_sum(loss_train), feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 kl += sess.run(mean_KL, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
-                ce_estimate_prior += sess.run(cross_entropy_p, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
-                ce_estimate_approx += sess.run(cross_entropy_q, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
+                ce_estimate_prior += sess.run(cross_entropy_p, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train}) / n_batches_train
+                ce_estimate_approx += sess.run(cross_entropy_q, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train}) / n_batches_train
 
                 sys.stdout.write('.')
                 sys.stdout.flush()
@@ -388,7 +388,7 @@ def main(permutation, split, alpha, layers):
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
 
-            if epoch >= 20:
+            if epoch >= 25:
                 # print(" ERROR IN THE CONSTRUCTION OF THE OBJECTIVE FUNCTION ")
                 import pdb; pdb.set_trace()
 
