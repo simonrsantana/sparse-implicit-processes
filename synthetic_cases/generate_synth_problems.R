@@ -2,7 +2,7 @@
 setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/synthetic_cases/")
 set.seed(123)
 samples = 2000
-error_factor = 0
+error_factor = 1
 
 # Heterocedastic problem
 min_x = -4

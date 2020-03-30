@@ -35,8 +35,8 @@ def w_variable_variance(shape):
 
 # Import relevant functions concerning the different distributions of the model
 from aux_functions import *         # Functions that calculate moments given sampled values
-from BNN_prior import *
-# from alternative_BNN_prior import *             # Prior BNN model functions
+# from BNN_prior import *
+from alternative_BNN_prior import *             # Prior BNN model functions
 from neural_sampler import *        # Neural sampler that draws instances from q(·)
 from discriminators import *        # NNs that discriminate samples between distributions
 
@@ -181,9 +181,11 @@ def main(permutation, split, alpha, layers):
 
     # import pdb; pdb.set_trace()
     # Obtain values for the functions sampled at the points
-    # fx, fz = compute_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
-    fx, fz = compute_merged_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
+    fx, fz = compute_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
+    # fx, fz = compute_merged_samples_bnn(bnn, n_layers_bnn, [x, z], n_samples, dim_data, bnn_structure, number_IP)
     # fz = compute_samples_bnn(bnn, n_layers_bnn, z, n_samples, dim_data, bnn_structure)
+
+    # import pdb; pdb.set_trace()
 
     # Means
     m_fx = mean_f(fx)
@@ -234,7 +236,7 @@ def main(permutation, split, alpha, layers):
     unnorm_results = samples_pf * stdyTrain + meanyTrain    # Return the results to unnormalized values
 
     # L.L.
-    raw_test_ll = tf.reduce_logsumexp( -0.5*(tf.log(2 * np.pi * log_sigma2_noise * stdyTrain**2) + (y_ - unnorm_results)**2 / (log_sigma2_noise * stdyTrain**2)), axis = [ 1 ]) - tf.log(tf.cast(n_samples, tf.float32))
+    raw_test_ll = tf.reduce_logsumexp( -0.5*(tf.log(2 * np.pi * tf.exp(log_sigma2_noise) * stdyTrain**2) + (y_ - unnorm_results)**2 / (tf.exp(log_sigma2_noise) * stdyTrain**2)), axis = [ 1 ]) - tf.log(tf.cast(n_samples, tf.float32))
     test_ll_estimate = tf.reduce_sum( raw_test_ll )
 
     # import pdb; pdb.set_trace()
@@ -388,7 +390,7 @@ def main(permutation, split, alpha, layers):
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
 
-            if epoch >= 25:
+            if (epoch % 10) == 0:
                 # print(" ERROR IN THE CONSTRUCTION OF THE OBJECTIVE FUNCTION ")
                 import pdb; pdb.set_trace()
 
