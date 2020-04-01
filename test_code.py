@@ -56,7 +56,7 @@ original_file = sys.argv[ 4 ]
 n_samples_train = 10
 n_samples_test = 100
 
-n_batch = 100
+n_batch = 10
 n_epochs = 100
 
 ratio_train = 0.9 # Percentage of the data devoted to train

@@ -23,8 +23,8 @@ The rest of the codes included here, and additional folders that may appear are 
 
 This shows that the method is not learning properly. On black we have the real data, on red the estimates of the method, whose means are represented as green crosses (for each x_test given). 
 
-#### Results sampling the weights instead of the activations (epoch = 90)
-<img src="synthetic_cases/results_weights_sampled.png" alt="Final results estimated in the input test values for the noiseless synthetic problem" width="650"/>
+#### Results sampling the weights instead of the activations (100 epochs, alpha = 0.5)
+<img src="synthetic_cases/full_run_carlitos.png" alt="Final results estimated in the input test values for the noiseless synthetic problem" width="650"/>
 
 #### Results sampling the activations (epoch = 27, Cholesky decomposition falls apart afterwards)
 <img src="synthetic_cases/results_activations_sampled.png" alt="Results estimated (f(z)) in the inducing points for the noiseless synthetic problem" width="650"/>

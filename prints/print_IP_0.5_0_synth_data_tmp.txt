@@ -1,0 +1,1 @@
+alpha 0.5 datetime 2020-04-01 13:39:05.618026 epoch 0 ELBO 2043.99 Loss -2039.12 KL -19881 real_time 49.7954 cpu_train_time 67.2614 annealing_factor 0 C.E.(p) 0.0721441 C.E.(q) 0.159824
