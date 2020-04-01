@@ -501,6 +501,8 @@ def main(permutation, split, alpha, layers):
 
     logr = -0.5 * tf.reduce_sum(norm_weights_train**2 + tf.log(var_w_train) + np.log(2*np.pi), [ 2 ])
 
+    import pdb; pdb.set_trace()
+
     log_vars_prior = w_variable_variance([ 1 ])
 
     logz = -0.5 * tf.reduce_sum((weights_train)**2 / tf.exp(log_vars_prior) + log_vars_prior + np.log(2*np.pi), [ 2 ])

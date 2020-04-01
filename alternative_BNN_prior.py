@@ -104,8 +104,8 @@ def compute_samples_bnn(prior_network, n_layers, data, n_samples, dim_data, prio
     W2_prior = W2_mean_prior + tf.math.multiply(W2_sigma2_prior, noise_2)
     W3_prior = W3_mean_prior + tf.math.multiply(W3_sigma2_prior, noise_3)
 
-    A1_x =  tf.tensordot(x_input, W1_prior, axes = [1, 1]) + bias1_prior
-    h1_x = tf.nn.leaky_relu(A1_x) # h1 is batch_size x n_samples x n_units
+    A1 =  tf.tensordot(x_input, W1_prior, axes = [1, 1]) + bias1_prior
+    h1 = tf.nn.leaky_relu(A1) # h1 is batch_size x n_samples x n_units
 
     A1_z =  tf.tensordot(z_input, W1_prior, axes = [1, 1]) + bias1_prior
     h1_z = tf.nn.leaky_relu(A1_z) # h1 is batch_size x n_samples x n_units
@@ -113,22 +113,22 @@ def compute_samples_bnn(prior_network, n_layers, data, n_samples, dim_data, prio
     if prior_network['n_layers_bnn'] == 2:
 
 
-        A2_x = tf.reduce_sum( tf.multiply(tf.expand_dims(h1_x, -1), W2_prior), axis = 2) + bias2_prior
-        h2_x = tf.nn.leaky_relu(A2_x) # dims(h2) are (batch_size x n_samples x n_units)
+        A2 = tf.reduce_sum( tf.multiply(tf.expand_dims(h1, -1), W2_prior), axis = 2) + bias2_prior
+        h2 = tf.nn.leaky_relu(A2) # dims(h2) are (batch_size x n_samples x n_units)
         A2_z =  tf.reduce_sum( tf.multiply(tf.expand_dims(h1_z, -1), W2_prior), axis = 2) + bias2_prior
         h2_z = tf.nn.leaky_relu(A2_z) # dims(h2) are (batch_size x n_samples x n_units)
 
-        A3_x = tf.reduce_sum( tf.multiply(tf.expand_dims(h2_x, -1), W3_prior), axis = 2) + bias3_prior
+        A3 = tf.reduce_sum( tf.multiply(tf.expand_dims(h2, -1), W3_prior), axis = 2) + bias3_prior
         A3_z =  tf.reduce_sum( tf.multiply(tf.expand_dims(h2_z, -1), W3_prior), axis = 2) + bias3_prior
 
     else:
 
-        A3_x = tf.reduce_sum( tf.multiply(tf.expand_dims(h1_x, -1), W3_prior), axis = 2) + bias3_prior
+        A3 = tf.reduce_sum( tf.multiply(tf.expand_dims(h1, -1), W3_prior), axis = 2) + bias3_prior
         A3_z =  tf.reduce_sum( tf.multiply(tf.expand_dims(h1_z, -1), W3_prior), axis = 2) + bias3_prior
 
 
     # MLE solution estimate for the sampled functions
-    fx_samples = A3_x[:,:,0]
+    fx_samples = A3[:,:,0]
     fz_samples = A3_z[:,:,0]
 
     return fx_samples, fz_samples
@@ -137,7 +137,6 @@ def compute_samples_bnn(prior_network, n_layers, data, n_samples, dim_data, prio
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
 def compute_merged_samples_bnn(prior_network, n_layers, data, n_samples, dim_data, prior_structure, number_ips):
 
     # Number of units in each layer
@@ -146,51 +145,44 @@ def compute_merged_samples_bnn(prior_network, n_layers, data, n_samples, dim_dat
     x_input = tf.concat([data[ 0 ], data[ 1 ]], axis = 0)
     batch_size = tf.shape(x_input)[ 0 ]
 
-    #import pdb; pdb.set_trace()
-
-
     # Extract the weights' moments and the (not random) biases
-    W1_mean_prior = tf.reshape(prior_network['W1_mean_prior'], shape = [1, 1, n_units1, dim_data])
-    W1_sigma2_prior = tf.reshape( tf.exp( prior_network['W1_log_sigma2_prior'] ), shape = [1, 1, n_units1, dim_data])
+    W1_mean_prior = tf.reshape(prior_network['W1_mean_prior'], shape = [1, dim_data, n_units1 ])
+    W1_sigma2_prior = tf.reshape( tf.exp( prior_network['W1_log_sigma2_prior'] ), shape = [1, dim_data, n_units1])
     bias1_prior =  prior_network['bias1_prior']
 
-    W2_mean_prior = tf.reshape( prior_network['W2_mean_prior'], shape = [ 1, 1, n_units1, n_units2 ])
-    W2_sigma2_prior = tf.reshape( tf.exp( prior_network['W2_log_sigma2_prior'] ), shape = [ 1, 1, n_units1, n_units2 ])
+    W2_mean_prior = tf.reshape( prior_network['W2_mean_prior'], shape = [1, n_units1, n_units2 ])
+    W2_sigma2_prior = tf.reshape( tf.exp( prior_network['W2_log_sigma2_prior'] ), shape = [1, n_units1, n_units2 ])
     bias2_prior =  prior_network['bias2_prior']
 
-    W3_mean_prior = tf.reshape( prior_network['W3_mean_prior'], shape = [ 1, 1, n_units2, 1 ])
-    W3_sigma2_prior = tf.reshape( tf.exp( prior_network['W3_log_sigma2_prior'] ), shape = [ 1, 1, n_units2, 1 ])
+    W3_mean_prior = tf.reshape( prior_network['W3_mean_prior'], shape = [1, n_units2, 1 ])
+    W3_sigma2_prior = tf.reshape( tf.exp( prior_network['W3_log_sigma2_prior'] ), shape = [1, n_units2, 1 ])
     bias3_prior =  prior_network['bias3_prior']
 
 
     # Sample random noise for the sampling of the activations
-    noise_1 = tf.random_normal(shape = [ batch_size, n_samples, n_units1 ]) #, seed = seed)
-    noise_2 = tf.random_normal(shape = [ batch_size, n_samples, n_units2 ]) #, seed = seed)
-    noise_3 = tf.random_normal(shape = [ batch_size, n_samples, 1 ]) #, seed = seed)
+    noise_1 = tf.random_normal(shape = [ n_samples, dim_data, n_units1 ]) #, seed = seed)
+    noise_2 = tf.random_normal(shape = [ n_samples, n_units1, n_units2 ]) #, seed = seed)
+    noise_3 = tf.random_normal(shape = [ n_samples, n_units2, 1 ]) #, seed = seed)
 
-    # import pdb; pdb.set_trace()
+    # Construct the weights
+    W1_prior = W1_mean_prior + tf.math.multiply(W1_sigma2_prior, noise_1)
+    W2_prior = W2_mean_prior + tf.math.multiply(W2_sigma2_prior, noise_2)
+    W3_prior = W3_mean_prior + tf.math.multiply(W3_sigma2_prior, noise_3)
 
-    # Compute the output of the network employing the local reparametrization trick
-    x_expanded = tf.reshape(x_input, shape = [ batch_size, 1, 1, dim_data]) # Extend dimensions
-    gamma_1 = tf.reduce_sum( x_expanded * W1_mean_prior, axis = 3)
-    diff_1 = tf.reduce_sum( tf.math.square( x_expanded ) * W1_sigma2_prior, axis = 3)
-
-    A1 = (gamma_1 + bias1_prior) + tf.math.multiply(tf.math.sqrt(diff_1), noise_1) # Local reparam. trick first layer
+    A1 =  tf.tensordot(x_input, W1_prior, axes = [1, 1]) + bias1_prior
     h1 = tf.nn.leaky_relu(A1) # h1 is batch_size x n_samples x n_units
 
     if prior_network['n_layers_bnn'] == 2:
-        gamma_2 = tf.reduce_sum( tf.expand_dims(h1, -1) * W2_mean_prior, axis = 2)
-        diff_2 = tf.reduce_sum( tf.math.square( tf.expand_dims(h1, -1) ) * W2_sigma2_prior, axis = 2)
-        A2 = (gamma_2 + bias2_prior) + tf.math.multiply(tf.math.sqrt(diff_2), noise_2)
+
+
+        A2 = tf.reduce_sum( tf.multiply(tf.expand_dims(h1, -1), W2_prior), axis = 2) + bias2_prior
         h2 = tf.nn.leaky_relu(A2) # dims(h2) are (batch_size x n_samples x n_units)
 
-        gamma_3 = tf.reduce_sum( tf.expand_dims(h2, -1) * W3_mean_prior, axis = 2)
-        diff_3 = tf.reduce_sum( tf.math.square( tf.expand_dims(h2, -1) ) * W3_sigma2_prior, axis = 2)
-        A3 = (gamma_3 + bias3_prior) + tf.math.multiply(tf.math.sqrt(diff_3), noise_3)
+        A3 = tf.reduce_sum( tf.multiply(tf.expand_dims(h2, -1), W3_prior), axis = 2) + bias3_prior
+
     else:
-        gamma_3 = tf.reduce_sum( tf.expand_dims(h1, -1) * W3_mean_prior, axis = 2)
-        diff_3 = tf.reduce_sum( tf.math.square( tf.expand_dims(h1, -1) ) * W3_sigma2_prior, axis = 2)
-        A3 = (gamma_3 + bias3_prior) + tf.math.multiply(tf.math.sqrt(diff_3), noise_3) # A3 dims are (batchsize x n_samples x 1)
+
+        A3 = tf.reduce_sum( tf.multiply(tf.expand_dims(h1, -1), W3_prior), axis = 2) + bias3_prior
 
 
     # MLE solution estimate for the sampled functions

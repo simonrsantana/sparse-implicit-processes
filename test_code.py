@@ -292,6 +292,8 @@ def main(permutation, split, alpha, layers):
     # Final expression of the KL divergence, combining both discriminators
     KL = T_real_q - T_real_p + log_q_gaussian - log_p_gaussian
 
+    # import pdb; pdb.set_trace()
+
 
     ######################
     # Calculate the ELBO #
@@ -391,8 +393,20 @@ def main(permutation, split, alpha, layers):
 
 
             if (epoch % 10) == 0:
-                # print(" ERROR IN THE CONSTRUCTION OF THE OBJECTIVE FUNCTION ")
+
                 import pdb; pdb.set_trace()
+
+
+        res = sess.run([x, unnorm_results, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
+
+        input = res[0]
+        results = res[1]
+        labels = res[2]
+
+        merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
+
+        merge.to_csv("synthetic_cases/final_results_25IPs.csv", index = False)
+
 
         # import pdb; pdb.set_trace()
 
@@ -427,15 +441,9 @@ def main(permutation, split, alpha, layers):
             res_file.write("\n" + 'LL %g RMSE %g' % (TestLL, RMSE))
 
 
-        np.savetxt('res_IP/' + str(alpha) + '_rmse_' + str(split) + '.txt', [ RMSE ])
-        np.savetxt('res_IP/' + str(alpha) + '_ll_' + str(split) + '.txt', [ TestLL ])
+        np.savetxt('res_IP/' + str(alpha) + '_rmse_25IPs_' + str(split) + '.txt', [ RMSE ])
+        np.savetxt('res_IP/' + str(alpha) + '_ll_25IPs_' + str(split) + '.txt', [ TestLL ])
 
-
-        input, results, labels = sess.run([x, unnorm_results, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
-
-        merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
-
-        merge.to_csv("res_IP/truncated_biased_heteroc_IPs.csv", index = False)
 
 
 if __name__ == '__main__':
