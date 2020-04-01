@@ -29,3 +29,14 @@ This shows that the method is not learning properly. On black we have the real d
 #### Results sampling the activations (epoch = 27, Cholesky decomposition falls apart afterwards)
 <img src="synthetic_cases/results_activations_sampled.png" alt="Results estimated (f(z)) in the inducing points for the noiseless synthetic problem" width="650"/>
 
+
+
+
+###### Function samples from the prior depending on the initial values of the variances
+
+<img src="prior_samples_var-5.png" alt="Samples from the prior with variance defined (-5)" width="650"/>
+
+¿Tendencia negativa?
+
+<img src="prior_samples_var-3.png" alt="Samples from the prior with variance defined (-3)" width="650"/>
+

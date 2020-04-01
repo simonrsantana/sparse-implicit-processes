@@ -64,6 +64,7 @@ data$mean_estimate <- rowMeans(data[, 3:(nsamples + 2)])
 data <- data[order(data$x),]
 
 plot((train_data$V1 / 2.3), train_data$V2, pch = 20, col = rgb(red = 1, green = 1, blue = 0, alpha = 0.002), main = "Full run (alpha = 1.0)")
+points(data$x, data$y, pch = 20, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.5)) #, ylim = c(-4, 4))
 for (i in 1:nsamples){
   points(data$x, data[,i+2], pch = 20, col = rgb(red = 0, green = 1, blue = 0, alpha = 0.05))
 }

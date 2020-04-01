@@ -56,7 +56,7 @@ original_file = sys.argv[ 4 ]
 n_samples_train = 10
 n_samples_test = 100
 
-n_batch = 10
+n_batch = 100
 n_epochs = 100
 
 ratio_train = 0.9 # Percentage of the data devoted to train
@@ -392,10 +392,10 @@ def main(permutation, split, alpha, layers):
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
 
-            if (epoch % 10) == 0:
-
-                import pdb; pdb.set_trace()
-
+            if (epoch % 5) == 0:
+                f_x  = sess.run(fx, feed_dict={x: X_test, y_: y_test, n_samples: n_samples_train})
+                FX = pd.DataFrame(f_x)
+                FX.to_csv("fx.csv", index = False)
 
         res = sess.run([x, unnorm_results, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
 
@@ -405,7 +405,7 @@ def main(permutation, split, alpha, layers):
 
         merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
 
-        merge.to_csv("synthetic_cases/final_results_25IPs.csv", index = False)
+        merge.to_csv("res_IPf/test_results_" + str(alpha) + '_split_' + str(split) + ".csv", index = False)
 
 
         # import pdb; pdb.set_trace()
