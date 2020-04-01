@@ -34,11 +34,11 @@ This shows that the method is not learning properly. On black we have the real d
 
 #### Function samples from the prior depending on the initial values of the variances
 
-** Log-variance defined with a -5 ** 
+**Log-variance defined with a -5** 
 <img src="prior_samples_var-5.png" alt="Samples from the prior with variance defined (-5)" width="650"/>
 
 ¿Tendencia negativa?
 
-** Log-variance defined with a -3 **
+**Log-variance defined with a -3**
 <img src="prior_samples_var-3.png" alt="Samples from the prior with variance defined (-3)" width="650"/>
 
