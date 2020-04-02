@@ -31,6 +31,11 @@ This shows that the method is not learning properly. On black we have the real d
 
 
 
+#### BIMODAL CASE: Results sampling the weights instead of the activations (100 epochs, alpha = 1.0)
+<img src="synthetic_cases/bimodal_case.png" alt="Bimodal results estiamtes (alpha = 1.0)" width="650"/>
+
+
+
 
 #### Function samples from the prior depending on the initial values of the variances
 
