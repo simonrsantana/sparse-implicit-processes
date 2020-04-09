@@ -35,7 +35,7 @@ This shows that the method is not learning properly. On black we have the real d
 <img src="synthetic_cases/bimodal_case.png" alt="Bimodal results estiamtes (alpha = 1.0)" width="650"/>
 
 
-
+#### <em>There were some problems related to time scalability of the model. They seem to be solved here, and the method appears much faster as well</em>
 
 #### Function samples from the prior depending on the initial values of the variances
 
