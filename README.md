@@ -39,11 +39,11 @@ This shows that the method is not learning properly. On black we have the real d
 
 #### Function samples from the prior depending on the initial values of the variances
 
-**Log-variance defined with a -5** 
-<img src="prior_samples_var-5.png" alt="Samples from the prior with variance defined (-5)" width="650"/>
+Both of the results shown below are obtained in an identical fashion: the code is exactly the same for both of them with the exception of a change in the initial seed value. Only changing this makes it so that the behaviour of the initially sampled functions f(x) from the prior <em>p(·)</em> is different enough to allow for sign and other widespread changes. 
 
-¿Tendencia negativa?
+**Here the samples are shown to be all positive, but that depends on the initial seed of the code (seed = 123)** 
+<img src="synthetic_cases/samples_functions_prior.png" alt="Samples of functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
 
-**Log-variance defined with a -3**
-<img src="prior_samples_var-3.png" alt="Samples from the prior with variance defined (-3)" width="650"/>
+**Samples in the case of negative values (seed = 555)**
+<img src="synthetic_cases/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
 

@@ -25,12 +25,20 @@ import pandas as pd
 # =============================================================================
 
 def w_variable_mean(shape):
-  initial = tf.random_normal(shape = shape, stddev = 0.1, seed = seed) # mean 0 stddev 1
+  initial = tf.random.normal(shape = shape, mean = 0.0, stddev = 0.1) # mean 0 stddev 1
   return tf.Variable(initial)
 
 def w_variable_variance(shape):
-  initial = tf.random_normal(shape = shape, stddev = 0.1, seed = seed) - 5 # mean 0 stddev 1
+  initial = tf.random.normal(shape = shape, stddev = 0.1) - 4 # mean 0 stddev 1
   return tf.Variable(initial)
+
+# def w_variable_mean_prior(shape):
+#  initial = tf.random.normal(shape = shape, mean = 0.0, stddev = 0.5) # mean 0 stddev 1
+#  return tf.Variable(initial)
+
+# def w_variable_variance_prior(shape):
+#  initial = tf.random.normal(shape = shape, stddev = 0.1) - 2 # mean 0 stddev 1
+#  return tf.Variable(initial)
 
 
 # Import relevant functions concerning the different distributions of the model
@@ -43,7 +51,7 @@ from discriminators import *        # NNs that discriminate samples between dist
 import os
 os.chdir(".")
 
-seed = 123
+seed = 555
 
 # =============================================================================
 # Complete system parameters
@@ -57,7 +65,7 @@ n_samples_train = 10
 n_samples_test = 100
 
 n_batch = 100
-n_epochs = 100
+n_epochs = 2000
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
@@ -219,18 +227,20 @@ def main(permutation, split, alpha, layers):
     #### WE ARE DOING THE MEAN THROUGH THE SAMPLES OF f(z) (= u)
     # Instead of using u from the prior p(·), we use u from the approximate distribution q(·) for the differences in the expression
     mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])   # Dimensions: first term: (batchsize, 1); sec. term: (batchsize, n_samples)
-    cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )         # THIS MATRIX IS PRACTICALLY ZERO IN ALL ENTRIES ??????
+    cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
 
     # import pdb; pdb.set_trace()
 
     sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
-    # samples_pf = mean_est +  tf.tensordot(cov_est, sample_pf_noise, axes = [[1], [0]])
-    samples_pf = mean_est +  tf.matmul(tf.linalg.cholesky(cov_est+ tf.eye(tf.shape(cov_est)[ 0 ]) * 1e-2), sample_pf_noise)                # Shape is (batchsize, n_samples_train)
+    inner_cholesky = cov_est + tf.eye( tf.shape(x)[0] )*1e-2
+    chol_decomposition = tf.linalg.cholesky( inner_cholesky )
+    samples_pf = mean_est +  tf.matmul( chol_decomposition, sample_pf_noise )                # Shape is (batchsize, n_samples_train)
 
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 
     # Final loss for the data term
     loss_train = (1.0/alpha) * ( -tf.log(tf.cast(n_samples, tf.float32 )) + tf.reduce_logsumexp( -0.5 * alpha * (np.log( 2 * np.pi ) + log_sigma2_noise  + (samples_pf - y_)**2 / tf.exp(log_sigma2_noise) ), axis = [ 1 ]))
+    sum_loss = tf.reduce_sum( loss_train )
 
     # Compute the test metrics
     unnorm_results = samples_pf * stdyTrain + meanyTrain    # Return the results to unnormalized values
@@ -291,6 +301,7 @@ def main(permutation, split, alpha, layers):
 
     # Final expression of the KL divergence, combining both discriminators
     KL = T_real_q - T_real_p + log_q_gaussian - log_p_gaussian
+    mean_KL = tf.reduce_mean( KL )
 
     # import pdb; pdb.set_trace()
 
@@ -300,12 +311,10 @@ def main(permutation, split, alpha, layers):
     ######################
 
 
-    ELBO =  tf.reduce_sum( loss_train ) - kl_factor_ * tf.reduce_mean( KL ) * tf.cast(tf.shape(x)[ 0 ], tf.float32) / tf.cast(size_train, tf.float32)
+    ELBO =  sum_loss - kl_factor_ * mean_KL * tf.cast(tf.shape(x)[ 0 ], tf.float32) / tf.cast(size_train, tf.float32)
 
     neg_ELBO = -ELBO
     mean_ELBO = ELBO
-
-    mean_KL = tf.reduce_mean(KL)
 
     vars_primal = get_variables_ns(neural_sampler) + get_variables_bnn(bnn) + [ log_sigma2_noise, z ]
     vars_disc_prior = get_variables_discriminator(discriminator_prior)
@@ -355,7 +364,7 @@ def main(permutation, split, alpha, layers):
 
                 batch = [ X_train[ i_batch * n_batch : last_point, : ] , y_train[ i_batch * n_batch : last_point, ] ]
 
-                # import pdb; pdb.set_trace()
+                import pdb; pdb.set_trace()
 
                 sess.run(train_step_disc_prior, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
                     kl_factor_: kl_factor})
@@ -365,16 +374,33 @@ def main(permutation, split, alpha, layers):
                     kl_factor_: kl_factor})
 
                 # Overwrite the important quantities for the printed results
-                L += sess.run(neg_ELBO, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
-                loss += sess.run(tf.reduce_sum(loss_train), feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
-                kl += sess.run(mean_KL, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
-                ce_estimate_prior += sess.run(cross_entropy_p, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train}) / n_batches_train
-                ce_estimate_approx += sess.run(cross_entropy_q, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train}) / n_batches_train
+                L_cont, loss_cont, kl_cont, ce_estimate_prior_cont, ce_estimate_approx_cont = sess.run([neg_ELBO, sum_loss, mean_KL, cross_entropy_p, cross_entropy_q], feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
+                # loss += sess.run(sum_loss, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
+                # kl += sess.run(mean_KL, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
+                # ce_estimate_prior_cont, ce_estimate_approx_cont = sess.run([ cross_entropy_p, cross_entropy_q], feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train}) / n_batches_train
+
+                L += L_cont
+                loss += loss_cont
+                kl += kl_cont
+
+                ce_estimate_approx += ce_estimate_approx_cont
+                ce_estimate_prior += ce_estimate_prior_cont
+
 
                 sys.stdout.write('.')
                 sys.stdout.flush()
 
-                fini_train = time.clock()
+                # import pdb; pdb.set_trace()
+
+
+            # if (epoch % 5) == 0:
+            #     import pdb; pdb.set_trace()
+
+                # if (i_batch % 10) == 0:
+                #    with open("prints/times_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
+                #        res_file.write('alpha %g epoch %d batch %d datetime %s TRAIN: %g prior-disc %g approx-disc %g main %g EVALS: %g L %g loss %g kl %g ce(prior) %g ce(approx) %g' % (alpha, epoch, i_batch, str(datetime.now()), time_train, time_train_disc_prior, time_train_disc_approx, time_train_main, time_eval, time_L, time_loss, time_kl, time_ce_prior, time_ce_approx ) + "\n")
+
+
 
             fini = time.clock()
             fini_ref = time.time()
@@ -391,7 +417,6 @@ def main(permutation, split, alpha, layers):
             with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
-
             if (epoch % 5) == 0:
                 f_x  = sess.run(fx, feed_dict={x: X_test, y_: y_test, n_samples: n_samples_train})
                 FX = pd.DataFrame(f_x)
@@ -405,7 +430,7 @@ def main(permutation, split, alpha, layers):
 
         merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
 
-        merge.to_csv("res_IPf/test_results_" + str(alpha) + '_split_' + str(split) + ".csv", index = False)
+        merge.to_csv("res_IP/test_results_" + str(alpha) + '_split_' + str(split) + ".csv", index = False)
 
 
         # import pdb; pdb.set_trace()
@@ -463,6 +488,10 @@ if __name__ == '__main__':
     # Create a file to store the results of the run (or empty the previously existing one)
     if os.path.isfile("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file):
         with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "w") as res_file:
+           res_file.close()
+
+    if os.path.isfile("prints/LOSS_times_" + str(alpha) + "_" + str(split) + "_" +  original_file):
+        with open("prints/LOSS_times_" + str(alpha) + "_" + str(split) + "_" +  original_file, "w") as res_file:
            res_file.close()
 
     # Create the folder to save all the results

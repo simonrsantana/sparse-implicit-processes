@@ -72,5 +72,36 @@ points(data$x, data$mean_estimate, pch = 17, col = "red")
 lines(data$x, data$sample_1, lty = 1, col = rgb(red = 0, green = 0, blue = 1, alpha = 0.7))
 points(data$x, data$y, pch = 20, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.5)) #, ylim = c(-4, 4))
 
+#################################  PRIOR FUNCTIONS SAMPLES
+
+
+setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/synthetic_cases/")
+
+library(ggplot2)
+library(reshape2)
+
+data_x <- read.csv("prior_samples_x.csv")
+data_z <- read.csv("prior_samples_z.csv")
+nsamples <- 20
+
+names_x <- paste0("sample_", c(1:nsamples), "_fx")
+names_z <- paste0("sample_", c(1:nsamples), "_fz")
+
+names(data_x) <- c("x","y", names_x)
+names(data_z) <- c("z","y", names_z)
+  
+#data_x$mean_fx <- rowMeans(data[, 4:(nsamples + 3)])
+#data_z$mean_fz <- rowMeans(data[, 4:(nsamples + 3)])
+
+mdata_x <- melt(data_x, id.vars = c("x", "y"))
+mdata_z <- melt(data_z, id.vars = c("z", "y"))
+
+ggplot(mdata_x, aes(x, value, col=variable)) + 
+  geom_line() + theme(legend.position = "none")
+
+ggplot(mdata_z, aes(z, value, col=variable)) + 
+  geom_line() + theme(legend.position = "none")
+
+
 
 
