@@ -65,7 +65,7 @@ n_samples_train = 10
 n_samples_test = 100
 
 n_batch = 100
-n_epochs = 200
+n_epochs = 2000
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
