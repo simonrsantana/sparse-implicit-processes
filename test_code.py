@@ -51,7 +51,7 @@ from discriminators import *        # NNs that discriminate samples between dist
 import os
 os.chdir(".")
 
-seed = 555
+seed = 123
 
 # =============================================================================
 # Complete system parameters
@@ -65,7 +65,7 @@ n_samples_train = 10
 n_samples_test = 100
 
 n_batch = 100
-n_epochs = 2000
+n_epochs = 200
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
@@ -324,8 +324,12 @@ def main(permutation, split, alpha, layers):
     train_step_disc_prior = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_p, var_list = vars_disc_prior)
     train_step_disc_approx = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_q, var_list = vars_disc_approx)
 
-    # import pdb; pdb.set_trace()
 
+    # Create a dataframe to contain the evolution of the locaation of the inducing points
+    inducing_points = pd.DataFrame(index = range(n_epochs + 1), columns = range(number_IP))
+
+
+    # Set the configuration for the execution
     config = tf.ConfigProto(intra_op_parallelism_threads=3, inter_op_parallelism_threads=3, \
         allow_soft_placement=True, device_count = {'CPU': 3})
 
@@ -346,6 +350,9 @@ def main(permutation, split, alpha, layers):
             kl = 0.0
             loss = 0.0
 
+            # Store the position of the inducing points
+            inducing_points.iloc[epoch] = sess.run(z)[:,0]
+
             # Annealing factor for the KL term
             kl_factor =  np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
 
@@ -364,7 +371,7 @@ def main(permutation, split, alpha, layers):
 
                 batch = [ X_train[ i_batch * n_batch : last_point, : ] , y_train[ i_batch * n_batch : last_point, ] ]
 
-                import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
 
                 sess.run(train_step_disc_prior, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
                     kl_factor_: kl_factor})
@@ -374,7 +381,8 @@ def main(permutation, split, alpha, layers):
                     kl_factor_: kl_factor})
 
                 # Overwrite the important quantities for the printed results
-                L_cont, loss_cont, kl_cont, ce_estimate_prior_cont, ce_estimate_approx_cont = sess.run([neg_ELBO, sum_loss, mean_KL, cross_entropy_p, cross_entropy_q], feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
+                L_cont, loss_cont, kl_cont, ce_estimate_prior_cont, ce_estimate_approx_cont = sess.run([neg_ELBO, sum_loss, mean_KL, cross_entropy_p, \
+                    cross_entropy_q], feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 # loss += sess.run(sum_loss, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 # kl += sess.run(mean_KL, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train})
                 # ce_estimate_prior_cont, ce_estimate_approx_cont = sess.run([ cross_entropy_p, cross_entropy_q], feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train}) / n_batches_train
@@ -412,35 +420,33 @@ def main(permutation, split, alpha, layers):
 
             print('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx))
 
-
             # Store the training results while running
             with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
-            if (epoch % 5) == 0:
+            if (epoch % 20) == 0:
                 f_x  = sess.run(fx, feed_dict={x: X_test, y_: y_test, n_samples: n_samples_train})
                 FX = pd.DataFrame(f_x)
-                FX.to_csv("fx.csv", index = False)
+                FX.to_csv("prints/fx_" + original_file + "_epoch_" + str(epoch) + ".csv", index = False)
 
-        res = sess.run([x, unnorm_results, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
 
-        input = res[0]
-        results = res[1]
-        labels = res[2]
+        # Store the final location for the inducing points and save them
+        inducing_points.iloc[n_epochs] = sess.run(z)[:,0]
+        inducing_points.to_csv("res_IP/" + str(alpha) + "_IPs_split_" + str(split) + "_" + original_file )
 
+
+        # Store the final results to plot them
+        input, results, labels = sess.run([x, unnorm_results, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
         merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
 
         merge.to_csv("res_IP/test_results_" + str(alpha) + '_split_' + str(split) + ".csv", index = False)
 
-
         # import pdb; pdb.set_trace()
 
-        # Test Evaluation
         sys.stdout.write('\n')
+
+        # Test evaluations for the log-likelihood and the RMSE
         # ini_test = time.time()
-
-        # We do the test evaluation RMSE
-
         errors = 0.0
         LL  = 0.0
         n_batches_to_process = int(np.ceil(X_test.shape[ 0 ] / n_batch))

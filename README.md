@@ -47,3 +47,12 @@ Both of the results shown below are obtained in an identical fashion: the code i
 **Samples in the case of negative values (seed = 555)**
 <img src="synthetic_cases/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
 
+
+## Evolution of the positions of the inducing points by epochs
+
+Here we can see the changes in the position for the inducing points during the training. The above plot (A) includes the final test results (showcased in blue) and the test values employed to evaluate the metrics (black points). The mean of the test samples for the predictions is represented with the blue line. In the plot below we see the changes of the positions of the 50 induced points we have employed, being the x-axis their locations and the y-axis the epoch. 
+
+**Evolution of the location of the IPs**
+<img src="evolution-IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure" width="800"/>
+ 
+

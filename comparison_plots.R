@@ -75,13 +75,13 @@ points(data$x, data$y, pch = 20, col = rgb(red = 0, green = 0, blue = 0, alpha =
 #################################  PRIOR FUNCTIONS SAMPLES
 
 
-setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/synthetic_cases/")
+setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/")
 
 library(ggplot2)
 library(reshape2)
 
-data_x <- read.csv("prior_samples_x.csv")
-data_z <- read.csv("prior_samples_z.csv")
+data_x <- read.csv("synthetic_cases/prior_samples_x.csv")
+data_z <- read.csv("synthetic_cases/prior_samples_z.csv")
 nsamples <- 20
 
 names_x <- paste0("sample_", c(1:nsamples), "_fx")
@@ -97,11 +97,66 @@ mdata_x <- melt(data_x, id.vars = c("x", "y"))
 mdata_z <- melt(data_z, id.vars = c("z", "y"))
 
 ggplot(mdata_x, aes(x, value, col=variable)) + 
-  geom_line() + theme(legend.position = "none")
+  geom_line() + theme_bw() + theme(legend.position = "none") + 
+  ggtitle("Samples of (negative) functions from the implicit prior distribution (BNN)") +
+  xlab("x") + ylab("y") + theme(plot.title = element_text(hjust = 0.5)) 
+  
 
 ggplot(mdata_z, aes(z, value, col=variable)) + 
   geom_line() + theme(legend.position = "none")
 
 
 
+
+####################### Inducing points evolution throughout epochs
+
+
+
+setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/")
+
+library(ggplot2)
+library(reshape2)
+require(gridExtra)
+library(ggpubr)
+# theme_set(theme_pubr())
+
+# Prepare the first plot with the evolution of the induced points
+data <- read.csv("res_IP/0.5_IPs_split_0_synth_data_tmp.txt")
+ips <- ncol(data) - 1
+
+names(data) <- c("epoch", c(1:ips))
+
+mdata <- melt(data, id.vars = "epoch", variable.name = "IP")
+
+ips_plot <- ggplot(mdata, aes(value, epoch, col = IP)) + 
+  geom_line() + theme_bw() + theme(legend.position = "none") + 
+  xlab("x") + ylab("epoch") + theme(plot.title = element_text(hjust = 0.5)) +
+  xlim(-2, 2) 
+
+
+# Prepare the second plot with the results of the algorithm
+# train_data <- read.table("synth_data_tmp.txt")
+
+data_res <- read.csv("synthetic_cases/final_results_1.0.csv")
+nsamples <- ncol(data_res) - 2
+names(data_res) <- c("x", "y", c(1:nsamples))
+data_res$mean_estimate <- rowMeans(data_res[, 3:(nsamples + 2)])
+data_res <- data_res[order(data_res$x),]
+
+mres <- melt(data_res, id.vars = c("x", "y", "mean_estimate"), variable.name = "sample")
+
+res_plot <- ggplot(mres, aes(x*1.06,value)) + geom_point( color = "lightblue", alpha = 0.5) + theme_bw() + 
+  theme(legend.position = "none") + 
+  ggtitle("Test results") +
+  xlab("") + ylab("y") + theme(plot.title = element_text(hjust = 0.5)) +
+  geom_point(aes(x*1.06, y), color = "black") + 
+  geom_line(aes(x*1.06, mean_estimate), color = "darkblue") +  xlim(-2, 2)
+
+figure <- ggarrange(res_plot, ips_plot,
+                    labels = c("A", "B"),
+                    ncol = 1, nrow = 2, 
+                    heights = c(2,1))
+
+figure
+ggsave("evolution-IPs.png", width = 20, height = 13, units = "cm")
 
