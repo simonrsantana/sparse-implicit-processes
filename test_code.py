@@ -62,10 +62,10 @@ original_file = sys.argv[ 4 ]
 
 # This is the total number of training/test samples, epochs and batch sizes
 n_samples_train = 10
-n_samples_test = 100
+n_samples_test = 150
 
 n_batch = 100
-n_epochs = 2000
+n_epochs = 20
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
@@ -132,15 +132,16 @@ def main(permutation, split, alpha, layers):
     X_train = X[ index_train, : ]
     y_train = np.vstack(y[ index_train ])
 
-    #X_test = X[ index_test, : ]
-    #y_test = np.vstack(y[ index_test ])
+    X_test = X[ index_test, : ]
+    y_test = np.vstack(y[ index_test ])
 
-    data_test = np.loadtxt("synthetic_cases/synth_data_biased_heteroc_test.txt").astype(np.float32)
-    X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
-    y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
+    # If you want to use a predetermined test set, load it here
 
-    # Normalizamos los argumentos
+    # data_test = np.loadtxt("synthetic_cases/synth_data_biased_heteroc_test.txt").astype(np.float32)
+    # X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
+    # y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
 
+    #Normalize the input values
     meanXTrain = np.mean(X_train, axis = 0)
     stdXTrain = np.std(X_train, axis = 0)
 
@@ -325,8 +326,8 @@ def main(permutation, split, alpha, layers):
     train_step_disc_approx = tf.train.AdamOptimizer(dual_rate).minimize(cross_entropy_q, var_list = vars_disc_approx)
 
 
-    # Create a dataframe to contain the evolution of the locaation of the inducing points
-    inducing_points = pd.DataFrame(index = range(n_epochs + 1), columns = range(number_IP))
+    # Create a dataframe to contain the position of the IPs (initial and final only)
+    inducing_points = pd.DataFrame(index = range(2), columns = range(number_IP))
 
 
     # Set the configuration for the execution
@@ -339,6 +340,9 @@ def main(permutation, split, alpha, layers):
 
         total_ini = time.time()
 
+        # Store the initial positions of the inducing points
+        inducing_points.iloc[0] = sess.run(z)[:,0]
+
         # Change the value of alpha to begin exploring using the second value given
 
         for epoch in range(n_epochs):
@@ -349,9 +353,6 @@ def main(permutation, split, alpha, layers):
             ce_estimate_approx = 0.0
             kl = 0.0
             loss = 0.0
-
-            # Store the position of the inducing points
-            inducing_points.iloc[epoch] = sess.run(z)[:,0]
 
             # Annealing factor for the KL term
             kl_factor =  np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
@@ -401,14 +402,6 @@ def main(permutation, split, alpha, layers):
                 # import pdb; pdb.set_trace()
 
 
-            # if (epoch % 5) == 0:
-            #     import pdb; pdb.set_trace()
-
-                # if (i_batch % 10) == 0:
-                #    with open("prints/times_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
-                #        res_file.write('alpha %g epoch %d batch %d datetime %s TRAIN: %g prior-disc %g approx-disc %g main %g EVALS: %g L %g loss %g kl %g ce(prior) %g ce(approx) %g' % (alpha, epoch, i_batch, str(datetime.now()), time_train, time_train_disc_prior, time_train_disc_approx, time_train_main, time_eval, time_L, time_loss, time_kl, time_ce_prior, time_ce_approx ) + "\n")
-
-
 
             fini = time.clock()
             fini_ref = time.time()
@@ -424,14 +417,14 @@ def main(permutation, split, alpha, layers):
             with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "a") as res_file:
                 res_file.write('alpha %g datetime %s epoch %d ELBO %g Loss %g KL %g real_time %g cpu_train_time %g annealing_factor %g C.E.(p) %g C.E.(q) %g' % (alpha, str(datetime.now()), epoch, L, loss, kl, (fini_ref - ini_ref), (fini - ini), kl_factor, ce_estimate_prior, ce_estimate_approx) + "\n")
 
-            if (epoch % 20) == 0:
-                f_x  = sess.run(fx, feed_dict={x: X_test, y_: y_test, n_samples: n_samples_train})
-                FX = pd.DataFrame(f_x)
-                FX.to_csv("prints/fx_" + original_file + "_epoch_" + str(epoch) + ".csv", index = False)
+            # if (epoch % 20) == 0:
+            #     f_x  = sess.run(fx, feed_dict={x: X_test, y_: y_test, n_samples: n_samples_train})
+            #     FX = pd.DataFrame(f_x)
+            #     FX.to_csv("prints/fx_" + original_file + "_epoch_" + str(epoch) + ".csv", index = False)
 
 
         # Store the final location for the inducing points and save them
-        inducing_points.iloc[n_epochs] = sess.run(z)[:,0]
+        inducing_points.iloc[1] = sess.run(z)[:,0]
         inducing_points.to_csv("res_IP/" + str(alpha) + "_IPs_split_" + str(split) + "_" + original_file )
 
 
@@ -439,7 +432,7 @@ def main(permutation, split, alpha, layers):
         input, results, labels = sess.run([x, unnorm_results, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
         merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
 
-        merge.to_csv("res_IP/test_results_" + str(alpha) + '_split_' + str(split) + ".csv", index = False)
+        merge.to_csv('res_IP/' + str(alpha) + "/test_results_" + str(alpha) + '_split_' + str(split) + ".csv", index = False)
 
         # import pdb; pdb.set_trace()
 
@@ -472,8 +465,12 @@ def main(permutation, split, alpha, layers):
             res_file.write("\n" + 'LL %g RMSE %g' % (TestLL, RMSE))
 
 
-        np.savetxt('res_IP/' + str(alpha) + '_rmse_25IPs_' + str(split) + '.txt', [ RMSE ])
-        np.savetxt('res_IP/' + str(alpha) + '_ll_25IPs_' + str(split) + '.txt', [ TestLL ])
+        np.savetxt('res_IP/' + str(alpha) + '/rmse_' + str(split) + '.txt', [ RMSE ])
+        np.savetxt('res_IP/' + str(alpha) + '/ll_' + str(split) + '.txt', [ TestLL ])
+        np.savetxt('res_IP/' + str(alpha) + '/meanXtrain_' + str(split) + '.txt', [ meanXTrain ])
+        np.savetxt('res_IP/' + str(alpha) + '/meanytrain_' + str(split) + '.txt', [ meanyTrain ])
+        np.savetxt('res_IP/' + str(alpha) + '/stdXtrain_' + str(split) + '.txt', [ stdXTrain ])
+        np.savetxt('res_IP/' + str(alpha) + '/stdytrain_' + str(split) + '.txt', [ stdyTrain ])
 
 
 
@@ -496,12 +493,11 @@ if __name__ == '__main__':
         with open("prints/print_IP_" + str(alpha) + "_" + str(split) + "_" +  original_file, "w") as res_file:
            res_file.close()
 
-    if os.path.isfile("prints/LOSS_times_" + str(alpha) + "_" + str(split) + "_" +  original_file):
-        with open("prints/LOSS_times_" + str(alpha) + "_" + str(split) + "_" +  original_file, "w") as res_file:
-           res_file.close()
-
     # Create the folder to save all the results
     if not os.path.isdir("res_IP"):
         os.makedirs("res_IP")
+
+    if not os.path.isdir("res_IP/" + str(alpha) + "/"):
+        os.makedirs("res_IP/" + str(alpha) + "/")
 
     main(available_perm[split,], split, alpha, layers)
