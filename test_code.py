@@ -45,7 +45,7 @@ def w_variable_variance(shape):
 from aux_functions import *         # Functions that calculate moments given sampled values
 # from BNN_prior import *
 from alternative_BNN_prior import *             # Prior BNN model functions
-from neural_sampler import *        # Neural sampler that draws instances from q(·)
+from neural_sampler import *        # Neural sampler that draws instances from q()
 from discriminators import *        # NNs that discriminate samples between distributions
 
 import os
@@ -65,7 +65,7 @@ n_samples_train = 10
 n_samples_test = 150
 
 n_batch = 100
-n_epochs = 20
+n_epochs = 2000
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
@@ -132,14 +132,14 @@ def main(permutation, split, alpha, layers):
     X_train = X[ index_train, : ]
     y_train = np.vstack(y[ index_train ])
 
-    X_test = X[ index_test, : ]
-    y_test = np.vstack(y[ index_test ])
+    # X_test = X[ index_test, : ]
+    # y_test = np.vstack(y[ index_test ])
 
     # If you want to use a predetermined test set, load it here
 
-    # data_test = np.loadtxt("synthetic_cases/synth_data_biased_heteroc_test.txt").astype(np.float32)
-    # X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
-    # y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
+    data_test = np.loadtxt("test_data.txt").astype(np.float32)
+    X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
+    y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
 
     #Normalize the input values
     meanXTrain = np.mean(X_train, axis = 0)
@@ -226,7 +226,7 @@ def main(permutation, split, alpha, layers):
     cov_product = tf.matmul(K_xz, inv_term)
 
     #### WE ARE DOING THE MEAN THROUGH THE SAMPLES OF f(z) (= u)
-    # Instead of using u from the prior p(·), we use u from the approximate distribution q(·) for the differences in the expression
+    # Instead of using u from the prior p(), we use u from the approximate distribution q() for the differences in the expression
     mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])   # Dimensions: first term: (batchsize, 1); sec. term: (batchsize, n_samples)
     cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
 
@@ -327,21 +327,18 @@ def main(permutation, split, alpha, layers):
 
 
     # Create a dataframe to contain the position of the IPs (initial and final only)
-    inducing_points = pd.DataFrame(index = range(2), columns = range(number_IP))
+    inducing_points = pd.DataFrame(index = range(n_epochs + 1), columns = range(number_IP))
 
 
     # Set the configuration for the execution
-    config = tf.ConfigProto(intra_op_parallelism_threads=3, inter_op_parallelism_threads=3, \
-        allow_soft_placement=True, device_count = {'CPU': 3})
+    # config = tf.ConfigProto(intra_op_parallelism_threads=3, inter_op_parallelism_threads=3, \
+    #     allow_soft_placement=True, device_count = {'CPU': 3})
 
-    with tf.Session(config = config) as sess:
+    with tf.Session() as sess: # config = config) as sess:
 
         sess.run(tf.global_variables_initializer())
 
         total_ini = time.time()
-
-        # Store the initial positions of the inducing points
-        inducing_points.iloc[0] = sess.run(z)[:,0]
 
         # Change the value of alpha to begin exploring using the second value given
 
@@ -353,6 +350,9 @@ def main(permutation, split, alpha, layers):
             ce_estimate_approx = 0.0
             kl = 0.0
             loss = 0.0
+
+            # Store the initial positions of the inducing points
+            inducing_points.iloc[epoch] = sess.run(z)[:,0]
 
             # Annealing factor for the KL term
             kl_factor =  np.minimum(1.0 * epoch / kl_factor_limit, 1.0)
@@ -424,8 +424,8 @@ def main(permutation, split, alpha, layers):
 
 
         # Store the final location for the inducing points and save them
-        inducing_points.iloc[1] = sess.run(z)[:,0]
-        inducing_points.to_csv("res_IP/" + str(alpha) + "_IPs_split_" + str(split) + "_" + original_file )
+        inducing_points.iloc[n_epochs] = sess.run(z)[:,0]
+        inducing_points.to_csv("res_IP/" + str(alpha) + "/IPs_split_" + str(split) + "_" + original_file )
 
 
         # Store the final results to plot them
@@ -465,12 +465,12 @@ def main(permutation, split, alpha, layers):
             res_file.write("\n" + 'LL %g RMSE %g' % (TestLL, RMSE))
 
 
-        np.savetxt('res_IP/' + str(alpha) + '/rmse_' + str(split) + '.txt', [ RMSE ])
-        np.savetxt('res_IP/' + str(alpha) + '/ll_' + str(split) + '.txt', [ TestLL ])
-        np.savetxt('res_IP/' + str(alpha) + '/meanXtrain_' + str(split) + '.txt', [ meanXTrain ])
-        np.savetxt('res_IP/' + str(alpha) + '/meanytrain_' + str(split) + '.txt', [ meanyTrain ])
-        np.savetxt('res_IP/' + str(alpha) + '/stdXtrain_' + str(split) + '.txt', [ stdXTrain ])
-        np.savetxt('res_IP/' + str(alpha) + '/stdytrain_' + str(split) + '.txt', [ stdyTrain ])
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_rmse_' + str(split) + '.txt', [ RMSE ])
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_ll_' + str(split) + '.txt', [ TestLL ])
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_meanXtrain_' + str(split) + '.txt', [ meanXTrain ])
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_meanytrain_' + str(split) + '.txt', [ meanyTrain ])
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_stdXtrain_' + str(split) + '.txt', [ stdXTrain ])
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_stdytrain_' + str(split) + '.txt', [ stdyTrain ])
 
 
 

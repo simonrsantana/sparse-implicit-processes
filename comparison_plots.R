@@ -72,6 +72,8 @@ points(data$x, data$mean_estimate, pch = 17, col = "red")
 lines(data$x, data$sample_1, lty = 1, col = rgb(red = 0, green = 0, blue = 1, alpha = 0.7))
 points(data$x, data$y, pch = 20, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.5)) #, ylim = c(-4, 4))
 
+
+
 #################################  PRIOR FUNCTIONS SAMPLES
 
 
@@ -112,7 +114,7 @@ ggplot(mdata_z, aes(z, value, col=variable)) +
 
 
 
-setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/")
+setwd("/home/simon/Desktop/implicit-variational-inference/synthetic_data/bimodal_carlitos/1.0/")
 
 library(ggplot2)
 library(reshape2)
@@ -121,23 +123,23 @@ library(ggpubr)
 # theme_set(theme_pubr())
 
 # Prepare the first plot with the evolution of the induced points
-data <- read.csv("res_IP/0.5_IPs_split_0_synth_data_tmp.txt")
+data <- read.csv("IPs_split_0_bim_data.txt")
 ips <- ncol(data) - 1
 
 names(data) <- c("epoch", c(1:ips))
 
-mdata <- melt(data, id.vars = "epoch", variable.name = "IP")
+mdata <- melt(data, id.vars = "epoch") #, variable.name = "IP")
 
-ips_plot <- ggplot(mdata, aes(value, epoch, col = IP)) + 
+ips_plot <- ggplot(mdata, aes(value, epoch, col = variable, alpha = 0.95)) + 
   geom_line() + theme_bw() + theme(legend.position = "none") + 
   xlab("x") + ylab("epoch") + theme(plot.title = element_text(hjust = 0.5)) +
-  xlim(-2, 2) 
+  xlim(-2, 2) + scale_y_log10()
 
 
 # Prepare the second plot with the results of the algorithm
 # train_data <- read.table("synth_data_tmp.txt")
 
-data_res <- read.csv("synthetic_cases/final_results_1.0.csv")
+data_res <- read.csv("test_results_1.0_split_0.csv")
 nsamples <- ncol(data_res) - 2
 names(data_res) <- c("x", "y", c(1:nsamples))
 data_res$mean_estimate <- rowMeans(data_res[, 3:(nsamples + 2)])
@@ -158,5 +160,5 @@ figure <- ggarrange(res_plot, ips_plot,
                     heights = c(2,1))
 
 figure
-ggsave("evolution-IPs.png", width = 20, height = 13, units = "cm")
+ggsave("2_evolution-IPs.png", width = 20, height = 13, units = "cm")
 
