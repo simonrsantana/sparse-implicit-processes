@@ -55,4 +55,8 @@ Here we can see the changes in the position for the inducing points during the t
 **Evolution of the location of the IPs**
 <img src="evolution-IPs_2.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure" width="800"/>
  
+**COMPOSITE DATA CASE**
+When we use a composite dataset on which the first half is a constant and the second is a sine function, the IPs tend to group up in the place of the contact between the two different functions (x = -0.5)
+<img src="composite_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - composite data" width="800"/>
+
 
