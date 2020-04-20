@@ -65,7 +65,7 @@ n_samples_train = 10
 n_samples_test = 150
 
 n_batch = 100
-n_epochs = 20
+n_epochs = 2000
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
@@ -137,7 +137,7 @@ def main(permutation, split, alpha, layers):
 
     # If you want to use a predetermined test set, load it here
 
-    data_test = np.loadtxt("test_data.txt").astype(np.float32)
+    data_test = np.loadtxt("bim_test.txt").astype(np.float32)
     X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
     y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
 
@@ -233,7 +233,7 @@ def main(permutation, split, alpha, layers):
     # import pdb; pdb.set_trace()
 
     sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
-    inner_cholesky = cov_est + tf.eye( tf.shape(x)[0] ) * 1e-2
+    inner_cholesky = cov_est + tf.eye( tf.shape(x)[0] )*1e-2
     chol_decomposition = tf.linalg.cholesky( inner_cholesky )
     samples_pf = mean_est +  tf.matmul( chol_decomposition, sample_pf_noise )                # Shape is (batchsize, n_samples_train)
 
@@ -450,7 +450,7 @@ def main(permutation, split, alpha, layers):
 
             batch = [ X_test[ i * n_batch : last_point, : ] , y_test[ i * n_batch : last_point, ] ]
 
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             prev_res = np.mean(sess.run(unnorm_results, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}), axis = 1)
             SE_emp += np.mean( (prev_res - batch[1])**2 )
 
@@ -506,3 +506,4 @@ if __name__ == '__main__':
         os.makedirs("res_IP/" + str(alpha) + "/")
 
     main(available_perm[split,], split, alpha, layers)
+

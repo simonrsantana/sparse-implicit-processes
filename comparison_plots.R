@@ -162,3 +162,31 @@ figure <- ggarrange(res_plot, ips_plot,
 figure
 ggsave("2_evolution-IPs.png", width = 20, height = 13, units = "cm")
 
+
+
+
+############################## EXTRA ANALISIS SOBRE VARIANZAS Y EL ERROR
+
+
+library(reshape)
+library(ggplot2)
+
+alphas = c("0.0001", 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, "1.0")
+n_alphas  = length(alphas)
+
+mean_var <- c()
+for (i in 1:n_alphas){
+  
+  setwd("/home/simon/Desktop/implicit-variational-inference/synthetic_data/bimodal_carlitos/")
+  results_file <- paste0(as.character(alphas[i]), "/test_results_", as.character(alphas[i]), "_split_0.csv")
+  
+  results <- read.csv(results_file)
+  names(results) <- c("x", "y", (1:(ncol(results) - 2 )))
+  # results$mean_estimate <- rowMeans(results[, 3:ncol(results)])
+  results$variance <- apply(results[, 3:ncol(results)], 1, var)
+  
+  mean_var[i] <- mean(results$variance)
+  
+  # melted <- melt( results, id.vars = c("x", "y", "mean_estimate"), variable_name = "sample")
+
+}
