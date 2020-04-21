@@ -114,7 +114,7 @@ ggplot(mdata_z, aes(z, value, col=variable)) +
 
 
 
-setwd("/home/simon/Desktop/implicit-variational-inference/synthetic_data/bimodal_carlitos/1.0/")
+setwd("/home/simon/Desktop/implicit-variational-inference/synthetic_data/composite/1.0/")
 
 library(ggplot2)
 library(reshape2)
@@ -123,7 +123,7 @@ library(ggpubr)
 # theme_set(theme_pubr())
 
 # Prepare the first plot with the evolution of the induced points
-data <- read.csv("IPs_split_0_bim_data.txt")
+data <- read.csv("IPs_split_0_composite_data.txt")
 ips <- ncol(data) - 1
 
 names(data) <- c("epoch", c(1:ips))
@@ -133,7 +133,7 @@ mdata <- melt(data, id.vars = "epoch") #, variable.name = "IP")
 ips_plot <- ggplot(mdata, aes(value, epoch, col = variable, alpha = 0.95)) + 
   geom_line() + theme_bw() + theme(legend.position = "none") + 
   xlab("x") + ylab("epoch") + theme(plot.title = element_text(hjust = 0.5)) +
-  xlim(-2, 2) + scale_y_log10()
+  xlim(-2, 2) + scale_y_log2()
 
 
 # Prepare the second plot with the results of the algorithm
@@ -151,8 +151,8 @@ res_plot <- ggplot(mres, aes(x*1.06,value)) + geom_point( color = "lightblue", a
   theme(legend.position = "none") + 
   ggtitle("Test results") +
   xlab("") + ylab("y") + theme(plot.title = element_text(hjust = 0.5)) +
-  geom_point(aes(x*1.06, y), color = "black") + 
-  geom_line(aes(x*1.06, mean_estimate), color = "darkblue") +  xlim(-2, 2)
+  geom_point(aes(x, y), color = "black") + 
+  geom_line(aes(x, mean_estimate), color = "darkblue") +  xlim(-2, 2)
 
 figure <- ggarrange(res_plot, ips_plot,
                     labels = c("A", "B"),
@@ -160,7 +160,9 @@ figure <- ggarrange(res_plot, ips_plot,
                     heights = c(2,1))
 
 figure
-ggsave("2_evolution-IPs.png", width = 20, height = 13, units = "cm")
+
+setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/")
+ggsave("composite_IPs_LOG.png", width = 20, height = 13, units = "cm")
 
 
 

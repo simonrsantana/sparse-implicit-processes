@@ -24,15 +24,15 @@ The rest of the codes included here, and additional folders that may appear are 
 This shows that the method is not learning properly. On black we have the real data, on red the estimates of the method, whose means are represented as green crosses (for each x_test given). 
 
 #### Results sampling the weights instead of the activations (100 epochs, alpha = 1.0)
-<img src="synthetic_cases/full_run_carlitos.png" alt="Final results estimated in the input test values for the noiseless synthetic problem" width="650"/>
+<img src="figures/full_run_carlitos.png" alt="Final results estimated in the input test values for the noiseless synthetic problem" width="650"/>
 
 #### Results sampling the activations (epoch = 27, Cholesky decomposition falls apart afterwards)
-<img src="synthetic_cases/results_activations_sampled.png" alt="Results estimated (f(z)) in the inducing points for the noiseless synthetic problem" width="650"/>
+<img src="figures/results_activations_sampled.png" alt="Results estimated (f(z)) in the inducing points for the noiseless synthetic problem" width="650"/>
 
 
 
 #### BIMODAL CASE: Results sampling the weights instead of the activations (100 epochs, alpha = 1.0)
-<img src="synthetic_cases/bimodal_case.png" alt="Bimodal results estiamtes (alpha = 1.0)" width="650"/>
+<img src="figures/bimodal_case.png" alt="Bimodal results estiamtes (alpha = 1.0)" width="650"/>
 
 
 #### <em>There were some problems related to time scalability of the model. They seem to be solved here, and the method appears much faster as well</em>
@@ -42,10 +42,10 @@ This shows that the method is not learning properly. On black we have the real d
 Both of the results shown below are obtained in an identical fashion: the code is exactly the same for both of them with the exception of a change in the initial seed value. Only changing this makes it so that the behaviour of the initially sampled functions f(x) from the prior <em>p(·)</em> is different enough to allow for sign and other widespread changes. 
 
 **Here the samples are shown to be all positive, but that depends on the initial seed of the code (seed = 123)** 
-<img src="synthetic_cases/samples_functions_prior.png" alt="Samples of functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
+<img src="figures/samples_functions_prior.png" alt="Samples of functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
 
 **Samples in the case of negative values (seed = 555)**
-<img src="synthetic_cases/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
+<img src="figures/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
 
 
 ## Evolution of the positions of the inducing points by epochs
@@ -53,10 +53,10 @@ Both of the results shown below are obtained in an identical fashion: the code i
 Here we can see the changes in the position for the inducing points during the training. The above plot (**A**) includes the final test results (showcased in blue) and the test values employed to evaluate the metrics (black points). The mean of the test samples for the predictions is represented with the blue line. In the plot below (**B**) we see the changes of the positions of the 50 induced points we have employed, being the x-axis their locations and the y-axis the epoch. 
 
 **Evolution of the location of the IPs**
-<img src="evolution-IPs_2.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure" width="800"/>
+<img src="figures/evolution-IPs_2.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure" width="800"/>
  
 **COMPOSITE DATA CASE**
 When we use a composite dataset on which the first half is a constant and the second is a sine function, the IPs tend to group up in the place of the contact between the two different functions (x = -0.5)
-<img src="composite_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - composite data" width="800"/>
+<img src="figures/composite_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - composite data" width="800"/>
 
 
