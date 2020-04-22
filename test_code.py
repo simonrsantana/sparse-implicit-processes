@@ -25,11 +25,11 @@ import pandas as pd
 # =============================================================================
 
 def w_variable_mean(shape):
-  initial = tf.random.normal(shape = shape, mean = 0.0, stddev = 0.1) # mean 0 stddev 1
+  initial = tf.random.normal(shape = shape, mean = 0.0, stddev = 1.0) # mean 0 stddev 1
   return tf.Variable(initial)
 
 def w_variable_variance(shape):
-  initial = tf.random.normal(shape = shape, stddev = 0.1) - 4 # mean 0 stddev 1
+  initial = tf.random.normal(shape = shape, mean = 0.0, stddev = 0.1) - 5   # mean 0 stddev 1
   return tf.Variable(initial)
 
 # def w_variable_mean_prior(shape):
@@ -43,15 +43,15 @@ def w_variable_variance(shape):
 
 # Import relevant functions concerning the different distributions of the model
 from aux_functions import *         # Functions that calculate moments given sampled values
-from BNN_prior import *
-# from alternative_BNN_prior import *             # Prior BNN model functions
+# from BNN_prior import *
+from alt_BNN_prior import *             # Prior BNN model functions
 from neural_sampler import *        # Neural sampler that draws instances from q()
 from discriminators import *        # NNs that discriminate samples between distributions
 
 import os
 os.chdir(".")
 
-seed = 123
+seed = 111
 
 # =============================================================================
 # Complete system parameters
@@ -137,7 +137,7 @@ def main(permutation, split, alpha, layers):
 
     # If you want to use a predetermined test set, load it here
 
-    data_test = np.loadtxt("bim_test.txt").astype(np.float32)
+    data_test = np.loadtxt("composite_data_test.txt").astype(np.float32)
     X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
     y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
 
@@ -177,7 +177,7 @@ def main(permutation, split, alpha, layers):
     extended_main_structure.insert(0, dim_data)
 
     for i in (range(layers)):
-        total_weights_bnn += extended_main_structure[ i ] * extended_main_structure[ i+1 ]
+        total_weights_bnn += extended_main_structure[ i ] * extended_main_structure[ i + 1 ]
 
     total_weights_bnn += extended_main_structure[ layers ]  # Total number of weights used in the BNN
 
@@ -230,12 +230,14 @@ def main(permutation, split, alpha, layers):
     mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])   # Dimensions: first term: (batchsize, 1); sec. term: (batchsize, n_samples)
     cov_est = K_xx - tf.matmul( cov_product, K_xz, transpose_b = True )
 
-    # import pdb; pdb.set_trace()
 
     sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
-    inner_cholesky = cov_est + tf.eye( tf.shape(x)[0] )*1e-2
+    inner_cholesky = cov_est + tf.eye( tf.shape(x)[0] ) * 1e-2
+
+    import pdb; pdb.set_trace()
+
     chol_decomposition = tf.linalg.cholesky( inner_cholesky )
-    samples_pf = mean_est +  tf.matmul( chol_decomposition, sample_pf_noise )                # Shape is (batchsize, n_samples_train)
+    samples_pf = mean_est +  tf.matmul( chol_decomposition, sample_pf_noise, transpose_a = True)                # Shape is (batchsize, n_samples_train)
 
     log_sigma2_noise = tf.Variable(tf.cast(1.0 / 100.0, dtype = tf.float32))
 

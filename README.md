@@ -60,3 +60,8 @@ When we use a composite dataset on which the first half is a constant and the se
 <img src="figures/composite_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - composite data" width="800"/>
 
 
+
+Cuestiones que resolver:
+* **¿Qué sucede con las formas de las predicciones para el caso heterocedástico?**
+* **Problemas en la estimación de las varianzas**
+

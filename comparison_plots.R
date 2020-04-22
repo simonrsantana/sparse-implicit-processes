@@ -100,12 +100,12 @@ mdata_z <- melt(data_z, id.vars = c("z", "y"))
 
 ggplot(mdata_x, aes(x, value, col=variable)) + 
   geom_line() + theme_bw() + theme(legend.position = "none") + 
-  ggtitle("Samples of (negative) functions from the implicit prior distribution (BNN)") +
+  ggtitle("Samples of functions from the implicit prior distribution (BNN)") +
   xlab("x") + ylab("y") + theme(plot.title = element_text(hjust = 0.5)) 
   
 
-ggplot(mdata_z, aes(z, value, col=variable)) + 
-  geom_line() + theme(legend.position = "none")
+#ggplot(mdata_z, aes(z, value, col=variable)) + 
+#  geom_line() + theme(legend.position = "none")
 
 
 
