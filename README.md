@@ -2,7 +2,7 @@
 
 #### Structure of the code
 
-* **test_code.py**: Main body of the code. Includes calls to other functions to make the calculations needed in the model.
+* **AIP_code.py**: Main body of the code. Includes calls to other functions to make the calculations needed in the model.
 
 * **aux_functions.py**: Create auxiliary functions that estimate moments from given samples of functions evaluated at selected points (mean, deviation and covariance between two collections of samples).
 
@@ -14,54 +14,53 @@
 
 * <em>**prints**</em>: This folder contains the prints of the training run of test.py
 
-**To run the code, do:** python test_code.py [split] [alpha value] [n_layers (1 or 2)] boston_housing.txt
+**To run the code, do:** python AIP_code.py [split] [alpha value] [n_layers (1 or 2)] composite_data.txt
 
 The rest of the codes included here, and additional folders that may appear are just auxiliary and extra material that aid to develop the main code, on which it is based on. 
 
 
 ### EXAMPLE OF SYNTHETIC DATASET:
 
-This shows that the method is not learning properly. On black we have the real data, on red the estimates of the method, whose means are represented as green crosses (for each x_test given). 
+See the changes in behavior for the predictive distributions between low and high values of alpha. 
 
-#### Results sampling the weights instead of the activations (100 epochs, alpha = 1.0)
-<img src="figures/full_run_carlitos.png" alt="Final results estimated in the input test values for the noiseless synthetic problem" width="650"/>
+#### Heterocedastic data
+<img src="plot_results/het/0.0001.pdf" alt="Heterocedastic data, alpha = 0.0001" width="500"/>
+<img src="plot_results/het/1.0.pdf" alt="Heterocedastic data, alpha = 1.0" width="500"/>
 
-#### Results sampling the activations (epoch = 27, Cholesky decomposition falls apart afterwards)
-<img src="figures/results_activations_sampled.png" alt="Results estimated (f(z)) in the inducing points for the noiseless synthetic problem" width="650"/>
+#### Bimodal data
+<img src="plot_results/bim/0.0001.pdf" alt="Bimodal data, alpha = 0.0001" width="500"/>
+<img src="plot_results/bim/1.0.pdf" alt="Bimodal data, alpha = 1.0" width="500"/>
 
-
-
-#### BIMODAL CASE: Results sampling the weights instead of the activations (100 epochs, alpha = 1.0)
-<img src="figures/bimodal_case.png" alt="Bimodal results estiamtes (alpha = 1.0)" width="650"/>
-
-
-#### <em>There were some problems related to time scalability of the model. They seem to be solved here, and the method appears much faster as well</em>
-
-#### Function samples from the prior depending on the initial values of the variances
-
-Both of the results shown below are obtained in an identical fashion: the code is exactly the same for both of them with the exception of a change in the initial seed value. Only changing this makes it so that the behaviour of the initially sampled functions f(x) from the prior <em>p(·)</em> is different enough to allow for sign and other widespread changes. 
-
-**Here the samples are shown to be all positive, but that depends on the initial seed of the code (seed = 123)** 
-<img src="figures/samples_functions_prior.png" alt="Samples of functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
-
-**Samples in the case of negative values (seed = 555)**
-<img src="figures/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="650"/>
+#### Composite data
+<img src="plot_results/composite/0.0001.pdf" alt="Composite data, alpha = 0.0001" width="500"/>
+<img src="plot_results/composite/1.0.pdf" alt="Composite data, alpha = 1.0" width="500"/>
 
 
 ## Evolution of the positions of the inducing points by epochs
 
-Here we can see the changes in the position for the inducing points during the training. The above plot (**A**) includes the final test results (showcased in blue) and the test values employed to evaluate the metrics (black points). The mean of the test samples for the predictions is represented with the blue line. In the plot below (**B**) we see the changes of the positions of the 50 induced points we have employed, being the x-axis their locations and the y-axis the epoch. 
+Here we can see the changes in the position for the inducing points during the training. The above plot (**A**) includes the final test results (showcased in blue) and the test values employed to evaluate the metrics (black points). The mean of the test samples for the predictions is represented with the blue line. In the plot below (**B**) we see the changes of the positions of the 50 induced points we have employed, being the x-axis their locations and the y-axis the epoch. We do this analysis for the three synthetic datasets.
 
-**Evolution of the location of the IPs**
-<img src="figures/evolution-IPs_2.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure" width="800"/>
- 
-**COMPOSITE DATA CASE**
+**COMPOSITE DATA**
 When we use a composite dataset on which the first half is a constant and the second is a sine function, the IPs tend to group up in the place of the contact between the two different functions (x = -0.5)
 <img src="figures/composite_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - composite data" width="800"/>
 
+**HETEROCEDASTIC DATA**
+<img src="figures/heteroc_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - heterocedastic data" width="800"/>
+
+**BIMODAL DATA**
+<img src="figures/bimodal_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - bimodal data" width="800"/>
+
+* **Puede aprovecharse lo de que se herede la forma del prior, hay que hacer pruebas al respecto**
 
 
-Cuestiones que resolver:
-* **¿Qué sucede con las formas de las predicciones para el caso heterocedástico?**
-* **Problemas en la estimación de las varianzas**
+#### Function samples from the prior depending on the initial values of the variances
+
+Both of the results shown below are obtained in an identical fashion: the code is exactly the same for both of them with the exception of a change in the initial seed value. Only changing this makes it so that the behaviour of the initially sampled functions f(x) from the prior <em>p(·)</em> is different enough to allow for sign and other widespread changes. Biases are deterministic
+
+**Here the samples are shown to be all positive, but that depends on the initial seed of the code (seed = 123)** 
+<img src="figures/samples_functions_prior.png" alt="Samples of functions drawn from the prior implicit distribution (Bayesian NN)" width="400"/>
+
+**Samples in the case of negative values (seed = 555)**
+<img src="figures/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="400"/>
+
 

@@ -179,7 +179,7 @@ n_alphas  = length(alphas)
 mean_var <- c()
 for (i in 1:n_alphas){
   
-  setwd("/home/simon/Desktop/implicit-variational-inference/synthetic_data/heteroc_carlitos/")
+  setwd("/home/simon/Desktop/implicit-variational-inference/synthetic_data/res_bimodal/")
   results_file <- paste0(as.character(alphas[i]), "/test_results_", as.character(alphas[i]), "_split_0.csv")
   
   results <- read.csv(results_file)

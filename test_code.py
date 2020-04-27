@@ -25,7 +25,7 @@ import pandas as pd
 # =============================================================================
 
 def w_variable_mean(shape):
-  initial = tf.random.normal(shape = shape, mean = 0.0, stddev = 1.0) # mean 0 stddev 1
+  initial = tf.random.normal(shape = shape, mean = 0.0, stddev = 0.1) # mean 0 stddev 1
   return tf.Variable(initial)
 
 def w_variable_variance(shape):
@@ -65,7 +65,7 @@ n_samples_train = 10
 n_samples_test = 150
 
 n_batch = 100
-n_epochs = 2000
+n_epochs = 20
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
@@ -246,17 +246,18 @@ def main(permutation, split, alpha, layers):
     sum_loss = tf.reduce_sum( loss_train )
 
     # Compute the test metrics
-    unnorm_results = samples_pf * stdyTrain + meanyTrain    # Return the results to unnormalized values
+    y_test_norm = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ]) * log_sigma2_noise + samples_pf   # Using the fact that ŷ_i = f*(x_i) + \epsilon_i
+    y_test_estimated = y_test_norm * stdyTrain + meanyTrain    # Return the results to unnormalized values
 
     # L.L.
-    raw_test_ll = tf.reduce_logsumexp( -0.5*(tf.log(2 * np.pi * tf.exp(log_sigma2_noise) * stdyTrain**2) + (y_ - unnorm_results)**2 / (tf.exp(log_sigma2_noise) * stdyTrain**2)), axis = [ 1 ]) - tf.log(tf.cast(n_samples, tf.float32))
+    raw_test_ll = tf.reduce_logsumexp( -0.5*(tf.log(2 * np.pi * tf.exp(log_sigma2_noise) * stdyTrain**2) + (y_ - y_test_estimated)**2 / (tf.exp(log_sigma2_noise) * stdyTrain**2)), axis = [ 1 ]) - tf.log(tf.cast(n_samples, tf.float32))
     test_ll_estimate = tf.reduce_sum( raw_test_ll )
 
     # import pdb; pdb.set_trace()
 
     # S.E.
     #squared_error = tf.reduce_sum( (tf.reduce_mean(samples_pf, axis = [ 1 ]) * stdyTrain + meanyTrain - y_)**2 )
-    squared_error = tf.reduce_sum( tf.reduce_mean((unnorm_results - y_)**2, axis = [ 1 ]) )
+    squared_error = tf.reduce_sum( tf.reduce_mean((y_test_estimated - y_)**2, axis = [ 1 ]) )
     #import pdb; pdb.set_trace()
 
     ###############
@@ -431,7 +432,7 @@ def main(permutation, split, alpha, layers):
 
 
         # Store the final results to plot them
-        input, results, labels = sess.run([x, unnorm_results, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
+        input, results, labels = sess.run([x, y_test_estimated, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
         merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
 
         merge.to_csv('res_IP/' + str(alpha) + "/test_results_" + str(alpha) + '_split_' + str(split) + ".csv", index = False)
@@ -453,7 +454,7 @@ def main(permutation, split, alpha, layers):
             batch = [ X_test[ i * n_batch : last_point, : ] , y_test[ i * n_batch : last_point, ] ]
 
             # import pdb; pdb.set_trace()
-            prev_res = np.mean(sess.run(unnorm_results, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}), axis = 1)
+            prev_res = np.mean(sess.run(y_test_estimated, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}), axis = 1)
             SE_emp += np.mean( (prev_res - batch[1])**2 )
 
             errors += sess.run(squared_error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]

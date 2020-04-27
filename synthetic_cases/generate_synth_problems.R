@@ -18,16 +18,16 @@ data_2 <- data.frame(x = x, y = y2)
 write.table(x = data_2, file = "heteroc.txt", col.names = F, row.names = F)
 
 
-x_test <- seq(min_x, max_x, by = 0.1)
+x_test <- seq(min_x, max_x, by = 0.01)
 eps_test <- rnorm(length(x_test), sd = 2)
 y_test <- 7 * sin(x_test) +10 + eps_test * sin(x_test) * error_factor
 
 data_test <- data.frame(x = x_test, y = y_test)
 
-write.table(x = data_test, file = "synth_data_biased_heteroc_test.txt", col.names = F, row.names = F)
+write.table(x = data_test, file = "heteroc_test.txt", col.names = F, row.names = F)
 
 plot(x, y2, pch = 20, col = rgb(red = 0, green = 0, blue = 1, alpha = 0.3), main = "Sinusoidal curve - simple case", ylab = "y")
-points(x_test, y_test, pch = 4, col = rgb(red = 1, green = 0, blue = 0, alpha = 0.3))
+plot(x_test, y_test, pch = 4, col = rgb(red = 1, green = 0, blue = 0, alpha = 0.3))
 
 
 
@@ -51,7 +51,7 @@ plot(data_1, pch = 20, col = "blue", main = "Bi-modal problem")
 write.table(x = data_1, file = "bim_data.txt", col.names = F, row.names = F)
 
 
-x_test <- seq(min_x, max_x, by = 0.05)
+x_test <- seq(min_x, max_x, by = 0.01)
 eps_test <- rnorm(length(x_test), sd = 2)
 eps_1 <- rnorm(length(x_test))
 eps_2 <- rnorm(length(x_test))
@@ -96,7 +96,7 @@ new_data <- data.frame(x = x, y = y_final)
 write.table(x = new_data, file = "composite_data.txt", col.names = F, row.names = F)
 
 
-x_test <- seq(min_x, max_x, by = 0.1)
+x_test <- seq(min_x, max_x, by = 0.01)
 y_test_temp <-  10 * sin(x_test) + bias
 y_test_temp[x_test < x_cut] <- y_cut
 
