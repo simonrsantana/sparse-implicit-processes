@@ -114,7 +114,7 @@ ggplot(mdata_x, aes(x, value, col=variable)) +
 
 
 
-setwd("/home/simon/Desktop/implicit-variational-inference/synthetic_data/composite/1.0/")
+setwd("/home/simon/Desktop/implicit-variational-inference/synthetic_data/res_bim/1.0/")
 
 library(ggplot2)
 library(reshape2)
@@ -123,7 +123,7 @@ library(ggpubr)
 # theme_set(theme_pubr())
 
 # Prepare the first plot with the evolution of the induced points
-data <- read.csv("IPs_split_0_composite_data.txt")
+data <- read.csv("IPs_split_0_bim_data.txt")
 ips <- ncol(data) - 1
 
 names(data) <- c("epoch", c(1:ips))
@@ -133,21 +133,21 @@ mdata <- melt(data, id.vars = "epoch") #, variable.name = "IP")
 ips_plot <- ggplot(mdata, aes(value, epoch, col = variable, alpha = 0.95)) + 
   geom_line() + theme_bw() + theme(legend.position = "none") + 
   xlab("x") + ylab("epoch") + theme(plot.title = element_text(hjust = 0.5)) +
-  xlim(-2, 2) + scale_y_log2()
+  xlim(-2, 2) #+ scale_y_log2()
 
 
 # Prepare the second plot with the results of the algorithm
 # train_data <- read.table("synth_data_tmp.txt")
 
 data_res <- read.csv("test_results_1.0_split_0.csv")
+data_res <- data_res[,1:203]
 nsamples <- ncol(data_res) - 2
 names(data_res) <- c("x", "y", c(1:nsamples))
 data_res$mean_estimate <- rowMeans(data_res[, 3:(nsamples + 2)])
 data_res <- data_res[order(data_res$x),]
-
 mres <- melt(data_res, id.vars = c("x", "y", "mean_estimate"), variable.name = "sample")
 
-res_plot <- ggplot(mres, aes(x*1.06,value)) + geom_point( color = "lightblue", alpha = 0.5) + theme_bw() + 
+res_plot <- ggplot(mres, aes(x*1.06,value)) + geom_point( color = "lightblue", alpha = 0.05) + theme_bw() + 
   theme(legend.position = "none") + 
   ggtitle("Test results") +
   xlab("") + ylab("y") + theme(plot.title = element_text(hjust = 0.5)) +
@@ -161,8 +161,8 @@ figure <- ggarrange(res_plot, ips_plot,
 
 figure
 
-setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/")
-ggsave("composite_IPs_LOG.png", width = 20, height = 13, units = "cm")
+setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/figures")
+ggsave("bimodal_IPs.png", width = 20, height = 13, units = "cm")
 
 
 
