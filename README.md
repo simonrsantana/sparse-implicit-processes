@@ -2,7 +2,7 @@
 
 #### Structure of the code
 
-* **AIP_code.py**: Main body of the code. Includes calls to other functions to make the calculations needed in the model.
+* **AIP_main.py**: Main body of the code. Includes calls to other functions to make the calculations needed in the model.
 
 * **aux_functions.py**: Create auxiliary functions that estimate moments from given samples of functions evaluated at selected points (mean, deviation and covariance between two collections of samples).
 
@@ -14,7 +14,7 @@
 
 * <em>**prints**</em>: This folder contains the prints of the training run of test.py
 
-**To run the code, do:** python AIP_code.py [split] [alpha value] [n_layers (1 or 2)] composite_data.txt
+**To run the code, do:** python AIP_main.py [split] [alpha value] [n_layers (1 or 2)] composite_data.txt
 
 The rest of the codes included here, and additional folders that may appear are just auxiliary and extra material that aid to develop the main code, on which it is based on. 
 
