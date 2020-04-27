@@ -58,9 +58,9 @@ When we use a composite dataset on which the first half is a constant and the se
 Both of the results shown below are obtained in an identical fashion: the code is exactly the same for both of them with the exception of a change in the initial seed value. Only changing this makes it so that the behaviour of the initially sampled functions f(x) from the prior <em>p(·)</em> is different enough to allow for sign and other widespread changes. Biases are deterministic
 
 **Here the samples are shown to be all positive, but that depends on the initial seed of the code (seed = 123)** 
-<img src="figures/samples_functions_prior.png" alt="Samples of functions drawn from the prior implicit distribution (Bayesian NN)" width="400"/>
+<img src="figures/samples_functions_prior.png" alt="Samples of functions drawn from the prior implicit distribution (Bayesian NN)" width="350"/>
 
 **Samples in the case of negative values (seed = 555)**
-<img src="figures/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="400"/>
+<img src="figures/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="350"/>
 
 
