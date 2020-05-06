@@ -82,27 +82,65 @@ setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/")
 library(ggplot2)
 library(reshape2)
 
-data_x <- read.csv("synthetic_cases/prior_samples_x.csv")
-data_z <- read.csv("synthetic_cases/prior_samples_z.csv")
-nsamples <- 20
+alphas = c("0.0001", 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, "1.0") 
+n_alphas  = length(alphas)
+data_vec = c("t_skw", "t_central", "bim", "het", "composite")
 
-names_x <- paste0("sample_", c(1:nsamples), "_fx")
-names_z <- paste0("sample_", c(1:nsamples), "_fz")
-
-names(data_x) <- c("x","y", names_x)
-names(data_z) <- c("z","y", names_z)
+for (j in 1:length(data_vec)){
   
-#data_x$mean_fx <- rowMeans(data[, 4:(nsamples + 3)])
-#data_z$mean_fz <- rowMeans(data[, 4:(nsamples + 3)])
-
-mdata_x <- melt(data_x, id.vars = c("x", "y"))
-mdata_z <- melt(data_z, id.vars = c("z", "y"))
-
-ggplot(mdata_x, aes(x, value, col=variable)) + 
-  geom_line() + theme_bw() + theme(legend.position = "none") + 
-  ggtitle("Samples of functions from the implicit prior distribution (BNN)") +
-  xlab("x") + ylab("y") + theme(plot.title = element_text(hjust = 0.5)) 
+  data = data_vec[j]
   
+  for (i in c(1, 11)){
+    
+    data_dir <- paste0("/home/simon/Desktop/implicit-variational-inference/synthetic_data/res_", data, "/")
+    setwd(data_dir)
+
+    data_fx_init <- read.csv(paste0(alphas[i], "/", alphas[i], "initial_prior_samples_fx.csv"))
+    data_fx_final <- read.csv(paste0(alphas[i], "/", alphas[i], "final_prior_samples_fx.csv"))
+    # data_z <- read.csv("synthetic_cases/prior_samples_z.csv")
+    nsamples <- 20
+    
+    data_fx_init <- data_fx_init[, 1:(nsamples + 2) ]
+    data_fx_final <- data_fx_final[, 1:(nsamples + 2) ]
+    
+    names_x <- paste0("sample_", c(1:nsamples), "_fx")
+    # names_z <- paste0("sample_", c(1:nsamples), "_fz")
+    
+    names(data_fx_init) <- c("x","y", names_x)
+    names(data_fx_final) <- c("x","y", names_x)
+    # names(data_z) <- c("z","y", names_z)
+      
+    #data_x$mean_fx <- rowMeans(data[, 4:(nsamples + 3)])
+    #data_z$mean_fz <- rowMeans(data[, 4:(nsamples + 3)])
+    
+    mdata_fx_init <- melt(data_fx_init, id.vars = c("x", "y"))
+    mdata_fx_final <- melt(data_fx_final, id.vars = c("x", "y"))
+    # mdata_z <- melt(data_z, id.vars = c("z", "y"))
+    
+    
+    plots_dir <- paste0("/home/simon/Desktop/implicit-variational-inference/synthetic_data/plots/", data, "/")
+    setwd(plots_dir)
+    
+    # Save the initial prior samples
+    ggplot(mdata_fx_init, aes(x, value, col=variable, alpha = 0.9)) + 
+      geom_line() + theme_bw() + theme(legend.position = "none") + 
+      ggtitle("Initial prior functions sampled (BNN)") +
+      xlab("x") + ylab("y") + theme(plot.title = element_text(hjust = 0.5)) 
+      
+    ggsave(filename = paste0(alphas[i], "_initial_fx_", data, ".png"), width=10, height=5, pointsize=12, units = "in")
+
+    # Save the final prior samples
+    ggplot(mdata_fx_final, aes(x, value, col=variable, alpha = 0.9)) + 
+      geom_line() + theme_bw() + theme(legend.position = "none") + 
+      ggtitle("Final prior functions sampled (BNN)") +
+      xlab("x") + ylab("y") + theme(plot.title = element_text(hjust = 0.5)) 
+    
+    ggsave(filename = paste0(alphas[i], "_final_fx_", data, ".png"), width=10, height=5, pointsize=12, units = "in")
+    
+  }
+
+}
+
 
 #ggplot(mdata_z, aes(z, value, col=variable)) + 
 #  geom_line() + theme(legend.position = "none")

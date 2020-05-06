@@ -344,6 +344,11 @@ def main(permutation, split, alpha, layers):
 
         total_ini = time.time()
 
+        # Export the value of the prior functions before the training begins
+        input, ips, resx, resz, labels = sess.run([x, z, fx, fz, y_], feed_dict={x: X_test, y_: y_test, n_samples: 20})
+        merge_fx = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(resx)], axis = 1)
+        merge_fx.to_csv('res_IP/' + str(alpha) + "initial_prior_samples_fx.csv", index = False)
+
         # Change the value of alpha to begin exploring using the second value given
 
         for epoch in range(n_epochs):
@@ -427,13 +432,18 @@ def main(permutation, split, alpha, layers):
             #     FX.to_csv("prints/fx_" + original_file + "_epoch_" + str(epoch) + ".csv", index = False)
 
 
+        # Export values after training (predictions, prior functions samples, IP's locations)
+        input, ips, resx, resz, labels, results = sess.run([x, z, fx, fz, y_, y_test_estimated], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
+
+        # Store the prior functions samples
+        merge_fx = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(resx)], axis = 1)
+        merge_fx.to_csv('res_IP/' + str(alpha) + "final_prior_samples_fx.csv", index = False)
+
         # Store the final location for the inducing points and save them
         inducing_points.iloc[n_epochs] = sess.run(z)[:,0]
         inducing_points.to_csv("res_IP/" + str(alpha) + "/IPs_split_" + str(split) + "_" + original_file )
 
-
         # Store the final results to plot them
-        input, results, labels = sess.run([x, y_test_estimated, y_], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
         merge = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(results)], axis = 1)
 
         merge.to_csv('res_IP/' + str(alpha) + "/test_results_" + str(alpha) + '_split_' + str(split) + ".csv", index = False)
