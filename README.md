@@ -32,8 +32,8 @@ See the changes in behavior for the predictive distributions between low and hig
 <img src="plots/bim/1.0.png" alt="Bimodal data, alpha = 1.0" width="500"/>
 
 #### Composite data
-<img src="plots/composite/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
-<img src="plots/composite/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
+<img src="plots/composite/0.0001_extra_500.png" alt="Composite data, alpha = 0.0001" width="500"/>
+<img src="plots/composite/1.0_extra_500.png" alt="Composite data, alpha = 1.0" width="500"/>
 
 
 ## Evolution of the positions of the inducing points by epochs
