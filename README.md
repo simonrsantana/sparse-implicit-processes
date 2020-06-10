@@ -21,19 +21,19 @@ The rest of the codes included here, and additional folders that may appear are 
 
 ### EXAMPLE OF SYNTHETIC DATASET:
 
-See the changes in behavior for the predictive distributions between low and high values of alpha. Better figures (pdf) can be seen in the folder of <em>plot_results</em> for each dataset and each value of alpha.
+See the changes in behavior for the predictive distributions between low and high values of alpha. Better figures (pdf) can be seen in the folder of <em>plots</em> for each dataset and each value of alpha.
 
 #### Heterocedastic data
-<img src="plot_results/het/0.0001.png" alt="Heterocedastic data, alpha = 0.0001" width="500"/>
-<img src="plot_results/het/1.0.png" alt="Heterocedastic data, alpha = 1.0" width="500"/>
+<img src="plots/het/0.0001.png" alt="Heterocedastic data, alpha = 0.0001" width="500"/>
+<img src="plots/het/1.0.png" alt="Heterocedastic data, alpha = 1.0" width="500"/>
 
 #### Bimodal data
-<img src="plot_results/bim/0.0001.png" alt="Bimodal data, alpha = 0.0001" width="500"/>
-<img src="plot_results/bim/1.0.png" alt="Bimodal data, alpha = 1.0" width="500"/>
+<img src="plots/bim/0.0001.png" alt="Bimodal data, alpha = 0.0001" width="500"/>
+<img src="plots/bim/1.0.png" alt="Bimodal data, alpha = 1.0" width="500"/>
 
 #### Composite data
-<img src="plot_results/composite/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
-<img src="plot_results/composite/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
+<img src="plots/composite/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
+<img src="plots/composite/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
 
 
 ## Evolution of the positions of the inducing points by epochs
