@@ -180,3 +180,38 @@ points(x_test_tskw, y_test_tskw, pch = 4, col = rgb(red = 1, green = 0, blue = 0
 
 
 
+### Skewed normal distribution
+
+setwd("/home/simon/Desktop/implicit-variational-inference/implicit-processes/synthetic_cases/")
+set.seed(123)
+samples = 4000
+error_factor = 0.6
+
+# Heterocedastic problem
+min_x = -4
+max_x = 4
+skw_factor = 5
+
+x <- runif(samples, min = min_x, max = max_x)
+
+eps_skw <- rnorm(samples, sd = 1)
+y_skw <- -7 * sin(x) + 10 + eps_skw + exp(eps_skw) * error_factor  + x
+
+data_t_skw <- data.frame(x = x, y = y_skw)
+
+write.table(x = data_t_skw, file = "normal_skw.txt", col.names = F, row.names = F)
+
+x_test_tskw <- seq(min_x, max_x, by = 0.01)
+eps_tskw <- rnorm(length(x_test_tskw), sd = 1)
+y_tskw <- -7 * sin(x_test_tskw) + 10 + eps_tskw + exp(eps_tskw) * error_factor   + x_test_tskw
+
+data_test <- data.frame(x = x_test_tskw, y = y_tskw)
+
+write.table(x = data_test, file = "normal_skw.txt", col.names = F, row.names = F)
+
+hist(y_skw[x < 0.05][x > 0], breaks = 50)
+
+plot(x, y_skw, pch = 20, col = rgb(red = 0, green = 0, blue = 1, alpha = 0.3), main = "Normal data skewed", ylab = "y")
+points(x_test_tskw, y_tskw, pch = 4, col = rgb(red = 1, green = 0, blue = 0, alpha = 0.3))
+
+

@@ -17,6 +17,7 @@ import random
 import tensorflow as tf
 import numpy as np
 import pandas as pd
+from scipy.stats import norm
 
 
 
@@ -64,20 +65,20 @@ original_file = sys.argv[ 4 ]
 n_samples_train = 10
 n_samples_test = 500
 
-n_batch = 100
+n_batch = 10
 n_epochs = 2000
 
 ratio_train = 0.9 # Percentage of the data devoted to train
 
 # Number of inducing points
-number_IP = 50
+number_IP = 500
 
 # Parameters concerning the annealing factor of the KL divergence
 kl_factor_limit = int(n_epochs / 20)
 
 # Learning rates
-primal_rate = 1e-3 # Main BNN and neural sampler parameters
-dual_rate = 1e-2   # Discriminators
+primal_rate = 1e-4 # Main BNN and neural sampler parameters
+dual_rate = 1e-3   # Discriminators
 
 
 # STRUCTURE OF ALL THE NNs IN THE SYSTEM
@@ -132,14 +133,14 @@ def main(permutation, split, alpha, layers):
     X_train = X[ index_train, : ]
     y_train = np.vstack(y[ index_train ])
 
-    # X_test = X[ index_test, : ]
-    # y_test = np.vstack(y[ index_test ])
+    X_test = X[ index_test, : ]
+    y_test = np.vstack(y[ index_test ])
 
     # If you want to use a predetermined test set, load it here
 
-    data_test = np.loadtxt("heteroc_test.txt").astype(np.float32)
-    X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
-    y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
+    # data_test = np.loadtxt("heteroc_test.txt").astype(np.float32)
+    # X_test = data_test[ :, range(data_test.shape[ 1 ] - 1) ]
+    # y_test = np.vstack( data_test[ :, data_test.shape[ 1 ] - 1 ])
 
     #Normalize the input values
     meanXTrain = np.mean(X_train, axis = 0)
@@ -163,9 +164,13 @@ def main(permutation, split, alpha, layers):
 
 
     # Introduce the inducing points as variables initialized in a random subset of X
-    index_shuffle = [x for x in range(size_train)]
-    random.shuffle(index_shuffle)
-    index_IP = index_shuffle[ : number_IP ]
+    if number_IP > size_train:
+        index_IP = np.random.choice(size_train, number_IP, replace = True)
+    if number_IP <= size_train:
+        index_shuffle = [i for i in range(size_train)]
+        random.shuffle(index_shuffle)
+        index_IP = index_shuffle[ : number_IP ]
+
     z = tf.Variable(X_train[ index_IP, : ])         # Initialize the inducing points at random values of X_train
 
     n_layers_bnn = n_layers_ns = n_layers_disc_prior = n_layers_disc_approx = layers
@@ -246,9 +251,13 @@ def main(permutation, split, alpha, layers):
     sum_loss = tf.reduce_sum( loss_train )
 
     # Compute the test metrics
-    y_test_norm = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ]) * tf.sqrt(tf.exp(log_sigma2_noise)) + samples_pf   # Using the fact that ŷ_i = f*(x_i) + \epsilon_i
+    pre_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ]) * tf.sqrt(tf.exp(log_sigma2_noise))
+    y_test_norm = pre_noise + samples_pf   # Using the fact that \hat(y)_i = f*(x_i) + \epsilon_i
     y_test_estimated = y_test_norm * stdyTrain + meanyTrain    # Return the results to unnormalized values
 
+    # Export the moments to estimate the CRPS
+    res_mean_tmp = samples_pf * stdyTrain + meanyTrain
+    res_std_tmp = pre_noise + stdyTrain
 
     # L.L.
     raw_test_ll = tf.reduce_logsumexp( -0.5*(tf.log(2 * np.pi * tf.exp(log_sigma2_noise) * stdyTrain**2) + (y_ - y_test_estimated)**2 / (tf.exp(log_sigma2_noise) * stdyTrain**2)), axis = [ 1 ]) - tf.log(tf.cast(n_samples, tf.float32))
@@ -347,7 +356,7 @@ def main(permutation, split, alpha, layers):
         # Export the value of the prior functions before the training begins
         input, ips, resx, resz, labels = sess.run([x, z, fx, fz, y_], feed_dict={x: X_test, y_: y_test, n_samples: 20})
         merge_fx = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(resx)], axis = 1)
-        merge_fx.to_csv('res_IP/' + str(alpha) + "initial_prior_samples_fx.csv", index = False)
+        merge_fx.to_csv('res_IP/' + str(alpha) + '/' + str(alpha) + "_initial_prior_samples_fx.csv", index = False)
 
         # Change the value of alpha to begin exploring using the second value given
 
@@ -437,7 +446,7 @@ def main(permutation, split, alpha, layers):
 
         # Store the prior functions samples
         merge_fx = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(resx)], axis = 1)
-        merge_fx.to_csv('res_IP/' + str(alpha) + "final_prior_samples_fx.csv", index = False)
+        merge_fx.to_csv('res_IP/' + str(alpha) + '/' + str(alpha) + "_final_prior_samples_fx.csv", index = False)
 
         # Store the final location for the inducing points and save them
         inducing_points.iloc[n_epochs] = sess.run(z)[:,0]
@@ -451,6 +460,56 @@ def main(permutation, split, alpha, layers):
         # import pdb; pdb.set_trace()
 
         sys.stdout.write('\n')
+
+
+        res_mean, res_std = sess.run([res_mean_tmp, res_std_tmp], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
+
+        ###########################################
+        # Exact CRPS for the mixture of gaussians #
+        ###########################################
+
+        shape_quad = res_mean.shape
+
+        # Define the auxiliary function to help with the calculations
+        def aux_crps(mu, sigma_2):
+            first_term = 2 * np.sqrt(sigma_2) * norm.pdf( mu/np.sqrt(sigma_2) )
+            sec_term = mu * (2 * norm.cdf( mu/np.sqrt(sigma_2) ) - 1)
+            aux_term = first_term + sec_term
+
+            return aux_term
+
+        # Estimate the differences between means and variances for each sample, batch-wise
+        res_var = res_std ** 2
+        crps_exact = np.empty([ shape_quad[0] ])
+
+        for i in range(shape_quad[0]):
+            means_vec = res_mean[i, :]
+            vars_vec = res_var[i, :]
+
+            means_diff = np.empty([shape_quad[1], shape_quad[1]])
+            vars_sum = np.empty([shape_quad[1], shape_quad[1]])
+            ru, cu = np.triu_indices(means_vec.size,1)
+            rl, cl = np.tril_indices(means_vec.size,1)
+
+            means_diff[ru, cu] = means_vec[ru] - means_vec[cu]
+            means_diff[rl, cl] = means_vec[rl] - means_vec[cl]
+            vars_sum[ru, cu] = vars_vec[ru] + vars_vec[cu]
+            vars_sum[rl, cl] = vars_vec[rl] + vars_vec[cl]
+
+            # Term only depending on the means and vars
+            fixed_term = 1 / 2 * np.mean(aux_crps(means_diff, vars_sum))
+
+            # Term that depends on the real value of the data
+            dev_mean = labels[i, 0] - means_vec
+            data_term = np.mean(aux_crps(dev_mean, vars_vec))
+
+            crps_exact[i] = data_term - fixed_term
+
+        mean_crps_exact = np.mean(crps_exact)
+
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_raw_exact_CRPS_' + str(split) + ".txt", crps_exact)
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_mean_exact_CRPS_' + str(split) + ".txt", [ mean_crps_exact ])
+
 
         # Test evaluations for the log-likelihood and the RMSE
         # ini_test = time.time()
@@ -468,8 +527,9 @@ def main(permutation, split, alpha, layers):
             prev_res = np.mean(sess.run(y_test_estimated, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}), axis = 1)
             SE_emp += np.mean( (prev_res - batch[1])**2 )
 
-            errors += sess.run(squared_error, feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
-            LL += sess.run(test_ll_estimate, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_test}) / batch[ 0 ].shape[ 0 ]
+            errors_tmp, LL_tmp = sess.run([ squared_error, test_ll_estimate] , feed_dict={x: batch[0], y_: batch[1], n_samples: n_samples_test})
+            errors += errors_tmp / batch[ 0 ].shape[ 0 ]
+            LL += LL_tmp / batch[ 0 ].shape[ 0 ]
 
         # error_class = errors / float(X_test.shape[ 0 ])
         RMSE = np.sqrt(errors / n_batches_to_process)
@@ -484,7 +544,7 @@ def main(permutation, split, alpha, layers):
 
 
         np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_rmse_' + str(split) + '.txt', [ RMSE ])
-        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_original_rmse_' + str(split) + '.txt', [ SE_estimate ])
+        np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_empirical_rmse_' + str(split) + '.txt', [ SE_estimate ])
         np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_ll_' + str(split) + '.txt', [ TestLL ])
         np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_meanXtrain_' + str(split) + '.txt', [ meanXTrain ])
         np.savetxt('res_IP/' + str(alpha) + '/' + str(alpha) + '_meanytrain_' + str(split) + '.txt', [ meanyTrain ])

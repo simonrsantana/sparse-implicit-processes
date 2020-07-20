@@ -4,7 +4,7 @@
 # approximate distribution over functions evaluated at the induced points
 ################################################################################
 
-from test_code import w_variable_mean, w_variable_variance
+from AIP_main import w_variable_mean, w_variable_variance
 
 import tensorflow as tf
 import numpy as np

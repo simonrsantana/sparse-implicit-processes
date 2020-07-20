@@ -4,8 +4,8 @@
 ################################################################################
 
 
-from test_code import w_variable_mean
-from test_code import w_variable_variance
+from AIP_main import w_variable_mean
+from AIP_main import w_variable_variance
 
 # from test_code import w_variable_mean_prior as w_variable_mean
 # from test_code import w_variable_variance_prior as w_variable_variance
