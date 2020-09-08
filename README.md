@@ -39,36 +39,32 @@ See the changes in behavior for the predictive distributions between low and hig
 <img src="plots/t_skw/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
 <img src="plots/t_skw/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
 
-#### Composite data
-<img src="plots/composite/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
-<img src="plots/composite/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
-
-
 ## Evolution of the positions of the inducing points by epochs
 
 Here we can see the changes in the position for the inducing points during the training. The above plot (**A**) includes the final test results (showcased in blue) and the test values employed to evaluate the metrics (black points). The mean of the test samples for the predictions is represented with the blue line. In the plot below (**B**) we see the changes of the positions of the 50 induced points we have employed, being the x-axis their locations and the y-axis the epoch. We do this analysis for the three synthetic datasets.
 
 **COMPOSITE DATA**
-When we use a composite dataset on which the first half is a constant and the second is a sine function, the IPs tend to group up in the place of the contact between the two different functions (x = -0.5)
-<img src="figures/composite_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - composite data" width="800"/>
+When we use a composite dataset on which the first half is a constant and the second is a sine function, the IPs tend to group up in the place of the contact between the two different functions (x = -0.5) (the whole function is continous, although not the first derivative)
+<img src="figures/composite_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - composite data" width="500"/>
 
 **HETEROCEDASTIC DATA**
-<img src="figures/heteroc_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - heterocedastic data" width="800"/>
+The shape of the samples of the initial prior implicit distribution can be tailored to specific means. The final results here seem to indicate that some structure of the initial prior affect the way on which the predictions behave as well, as can be seen here. The initial prior consisted on very "straight"-like functions, and thus we can observe a somewhat straight lines pattern in the predictive intervals. This is being researched further. 
+<img src="figures/heteroc_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - heterocedastic data" width="500"/>
 
 **BIMODAL DATA**
-<img src="figures/bimodal_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - bimodal data" width="800"/>
+<img src="figures/bimodal_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - bimodal data" width="500"/>
 
-* **Puede aprovecharse lo de que se herede la forma del prior, hay que hacer pruebas al respecto**
+The shape of the prior can be exploited here, which remains to be carefully looked at. 
 
 
-#### Function samples from the prior depending on the initial values of the variances
+### The prior can be updated to end up being sensible to the data observed
 
-Both of the results shown below are obtained in an identical fashion: the code is exactly the same for both of them with the exception of a change in the initial seed value. Only changing this makes it so that the behaviour of the initially sampled functions f(x) from the prior <em>p(·)</em> is different enough to allow for sign and other widespread changes. Biases are deterministic
+The prior information contained, although important to the final prediction results, can be updated to reflect the data observed. As can be seen here, the prior functions sampled (in the first image) acquire a shape more similar to that of the observed points. Here the heterocedastic data is being used, the same as before (thus, it has a sinusoidal shape, which becomes apparent in the latter prior samples).
 
-**Here the samples are shown to be all positive, but that depends on the initial seed of the code (seed = 123)** 
-<img src="figures/samples_functions_prior.png" alt="Samples of functions drawn from the prior implicit distribution (Bayesian NN)" width="350"/>
+**Initial samples from the implicit prior (before training)**
+<img src="figures/1.0_initial_fx_het.png" alt="Initial samples from the implicit prior (before training)" width="400"/>
 
-**Samples in the case of negative values (seed = 555)**
-<img src="figures/samples_prior_distribution_negative.png" alt="Samples of (negative) functions drawn from the prior implicit distribution (Bayesian NN)" width="350"/>
+**Final sample functions from the prior (after training)**
+<img src="figures/1.0_final_fx_het.png.png" alt="Final sample functions from the prior (after training)" width="400"/>
 
 
