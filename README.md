@@ -45,10 +45,12 @@ Here we can see the changes in the position for the inducing points during the t
 
 **COMPOSITE DATA**
 When we use a composite dataset on which the first half is a constant and the second is a sine function, the IPs tend to group up in the place of the contact between the two different functions (x = -0.5) (the whole function is continous, although not the first derivative)
+
 <img src="figures/composite_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - composite data" width="500"/>
 
 **HETEROCEDASTIC DATA**
 The shape of the samples of the initial prior implicit distribution can be tailored to specific means. The final results here seem to indicate that some structure of the initial prior affect the way on which the predictions behave as well, as can be seen here. The initial prior consisted on very "straight"-like functions, and thus we can observe a somewhat straight lines pattern in the predictive intervals. This is being researched further. 
+
 <img src="figures/heteroc_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - heterocedastic data" width="500"/>
 
 **BIMODAL DATA**
@@ -65,10 +67,10 @@ The prior information contained, although important to the final prediction resu
 
 **Initial samples from the implicit prior (before training)**
 
-<img src="figures/1.0_initial_fx_het.png" alt="Initial samples from the implicit prior (before training)" width="400"/>
+<img src="figures/1.0_initial_fx_het.png" alt="Initial samples from the implicit prior (before training)" width="500"/>
 
 **Final sample functions from the prior (after training)**
 
-<img src="figures/1.0_final_fx_het.png" alt="Final sample functions from the prior (after training)" width="400"/>
+<img src="figures/1.0_final_fx_het.png" alt="Final sample functions from the prior (after training)" width="500"/>
 
 
