@@ -53,6 +53,7 @@ The shape of the samples of the initial prior implicit distribution can be tailo
 
 **BIMODAL DATA**
 As before, strong preferences in location for the implicit points cannot be seen neither here or in the heterocedastic case. 
+
 <img src="figures/bimodal_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - bimodal data" width="500"/>
 
 The shape of the prior can be exploited here, which remains to be carefully looked at. 
@@ -63,9 +64,11 @@ The shape of the prior can be exploited here, which remains to be carefully look
 The prior information contained, although important to the final prediction results, can be updated to reflect the data observed. As can be seen here, the prior functions sampled (in the first image) acquire a shape more similar to that of the observed points. Here the heterocedastic data is being used, the same as before (thus, it has a sinusoidal shape, which becomes apparent in the latter prior samples).
 
 **Initial samples from the implicit prior (before training)**
+
 <img src="figures/1.0_initial_fx_het.png" alt="Initial samples from the implicit prior (before training)" width="400"/>
 
 **Final sample functions from the prior (after training)**
+
 <img src="figures/1.0_final_fx_het.png" alt="Final sample functions from the prior (after training)" width="400"/>
 
 
