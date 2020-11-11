@@ -74,12 +74,12 @@ When we use a composite dataset on which the first half is a constant and the se
 **HETEROCEDASTIC DATA**
 The shape of the samples of the initial prior implicit distribution can be tailored to specific means. The final results here seem to indicate that some structure of the initial prior affect the way on which the predictions behave as well, as can be seen here. The initial prior consisted on very "straight"-like functions, and thus we can observe a somewhat straight lines pattern in the predictive intervals. This is being researched further. 
 
-<img src="plots/figures/heteroc_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - heterocedastic data" width="600"/>
+<img src="plots_bnn/figures/heteroc_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - heterocedastic data" width="600"/>
 
 **BIMODAL DATA**
 As before, strong preferences in location for the implicit points cannot be seen neither here or in the heterocedastic case. 
 
-<img src="plots/figures/bimodal_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - bimodal data" width="600"/>
+<img src="plots_bnn/figures/bimodal_IPs.png" alt="Changes in the position of the inducing points depending on the epoch in the training procedure - bimodal data" width="600"/>
 
 The shape of the prior can be exploited here, which remains to be carefully looked at. 
 
@@ -90,10 +90,10 @@ The prior information contained, although important to the final prediction resu
 
 **Initial samples from the implicit prior (before training)**
 
-<img src="plots/figures/1.0_initial_fx_het.png" alt="Initial samples from the implicit prior (before training)" width="500"/>
+<img src="plots_bnn/figures/1.0_initial_fx_het.png" alt="Initial samples from the implicit prior (before training)" width="500"/>
 
 **Final sample functions from the prior (after training)**
 
-<img src="plots/figures/1.0_final_fx_het.png" alt="Final sample functions from the prior (after training)" width="500"/>
+<img src="plots_bnn/figures/1.0_final_fx_het.png" alt="Final sample functions from the prior (after training)" width="500"/>
 
 
