@@ -44,8 +44,8 @@ The results shown here for the NS are obtained by training 2000 epochs (the same
 <img src="plots_ns/bim/1.0.png" alt="Bimodal data, alpha = 1.0" width="500"/>
 
 #### Composite data (BNN)
-<img src="plots_bnn/composite/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
-<img src="plots_bnn/composite/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
+<img src="plots_bnn/composite/0.0001_extra_500.png" alt="Composite data, alpha = 0.0001" width="500"/>
+<img src="plots_bnn/composite/1.0_extra_500.png" alt="Composite data, alpha = 1.0" width="500"/>
 
 #### Composite data (NS)
 <img src="plots_ns/composite/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
