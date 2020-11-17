@@ -32,40 +32,40 @@ The results shown here for the NS are obtained by training 2000 epochs (the same
 <img src="plots_bnn/het/1.0.png" alt="Heterocedastic data, alpha = 1.0" width="500"/>
 
 #### Heterocedastic data (NS)
-<img src="plots_ns/het/0.0001.png" alt="Heterocedastic data, alpha = 0.0001" width="500"/>
-<img src="plots_ns/het/1.0.png" alt="Heterocedastic data, alpha = 1.0" width="500"/>
+<img src="plots_ns/het/0.0001.jpeg" alt="Heterocedastic data, alpha = 0.0001" width="500"/>
+<img src="plots_ns/het/1.0.jpeg" alt="Heterocedastic data, alpha = 1.0" width="500"/>
 
 #### Bimodal data (BNN)
 <img src="plots_bnn/bim/0.0001.png" alt="Bimodal data, alpha = 0.0001" width="500"/>
 <img src="plots_bnn/bim/1.0.png" alt="Bimodal data, alpha = 1.0" width="500"/>
 
 #### Bimodal data (NS)
-<img src="plots_ns/bim/0.0001.png" alt="Bimodal data, alpha = 0.0001" width="500"/>
-<img src="plots_ns/bim/1.0.png" alt="Bimodal data, alpha = 1.0" width="500"/>
+<img src="plots_ns/bim/0.0001.jpeg" alt="Bimodal data, alpha = 0.0001" width="500"/>
+<img src="plots_ns/bim/1.0.jpeg" alt="Bimodal data, alpha = 1.0" width="500"/>
 
 #### Composite data (BNN)
 <img src="plots_bnn/composite/0.0001_extra_500.png" alt="Composite data, alpha = 0.0001" width="500"/>
 <img src="plots_bnn/composite/1.0_extra_500.png" alt="Composite data, alpha = 1.0" width="500"/>
 
 #### Composite data (NS)
-<img src="plots_ns/composite/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
-<img src="plots_ns/composite/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
+<img src="plots_ns/composite/0.0001.jpeg" alt="Composite data, alpha = 0.0001" width="500"/>
+<img src="plots_ns/composite/1.0.jpeg" alt="Composite data, alpha = 1.0" width="500"/>
 
 #### T-distributed data (BNN)
 <img src="plots_bnn/t_central/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
 <img src="plots_bnn/t_central/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
 
 #### T-distributed data (NS)
-<img src="plots_ns/t_central/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
-<img src="plots_ns/t_central/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
+<img src="plots_ns/t_central/0.0001.jpeg" alt="Composite data, alpha = 0.0001" width="500"/>
+<img src="plots_ns/t_central/1.0.jpeg" alt="Composite data, alpha = 1.0" width="500"/>
 
 #### T-distributed and skewed data (BNN)
 <img src="plots_bnn/t_skw/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
 <img src="plots_bnn/t_skw/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
 
-#### T-distributed and skewed data (BNN)
-<img src="plots_ns/t_skw/0.0001.png" alt="Composite data, alpha = 0.0001" width="500"/>
-<img src="plots_ns/t_skw/1.0.png" alt="Composite data, alpha = 1.0" width="500"/>
+#### T-distributed and skewed data (NS)
+<img src="plots_ns/t_skw/0.0001.jpeg" alt="Composite data, alpha = 0.0001" width="500"/>
+<img src="plots_ns/t_skw/1.0.jpeg" alt="Composite data, alpha = 1.0" width="500"/>
 
 
 ## Evolution of the positions of the inducing points by epochs
@@ -93,6 +93,8 @@ The shape of the prior can be exploited here, which remains to be carefully look
 
 
 ### The prior can be updated to end up being sensible to the data observed
+
+**The prior analysis for the NS is done also - the results are in the plots folder**
 
 The prior information contained, although important to the final prediction results, can be updated to reflect the data observed. As can be seen here, the prior functions sampled (in the first image) acquire a shape more similar to that of the observed points. Here the heterocedastic data is being used, the same as before (thus, it has a sinusoidal shape, which becomes apparent in the latter prior samples).
 
