@@ -6,11 +6,15 @@ import tensorflow as tf
 import pdb
 from aux_functions import calculate_covariances
 
+
+from AIP_ns import w_variable_mean
+
+'''
 #### function to declare tf variables
 def ns_variables(shape):
     initial = tf.random.normal(shape = shape, mean = 0.0, stddev = 0.1)
     return tf.Variable(initial)
-
+'''
 
 #### Function: create_neural_sampler
 #### this func. create the tf variables of the model
@@ -20,24 +24,24 @@ def create_ns_prior(dim_data, prior_ns_structure, n_layers_ns):
     # m is both the dim. of the noise input and the output of this net
     m = prior_ns_structure[-1]
     
-    W1_prior_noise = ns_variables([m, prior_ns_structure[0]])
-    bias1_prior_noise = ns_variables([prior_ns_structure[0]])
+    W1_prior_noise = w_variable_mean([m, prior_ns_structure[0]])
+    bias1_prior_noise = w_variable_mean([prior_ns_structure[0]])
 
-    W2_prior_noise = ns_variables([prior_ns_structure[0], prior_ns_structure[1]])
-    bias2_prior_noise = ns_variables([prior_ns_structure[1]])
+    W2_prior_noise = w_variable_mean([prior_ns_structure[0], prior_ns_structure[1]])
+    bias2_prior_noise = w_variable_mean([prior_ns_structure[1]])
 
-    W3_prior_noise = ns_variables([prior_ns_structure[1], prior_ns_structure[2]])
-    bias3_prior_noise = ns_variables([prior_ns_structure[2]])
+    W3_prior_noise = w_variable_mean([prior_ns_structure[1], prior_ns_structure[2]])
+    bias3_prior_noise = w_variable_mean([prior_ns_structure[2]])
 
     # creating parameters of the neural net for the input
-    W1_prior_in = ns_variables([dim_data, prior_ns_structure[0]])
-    bias1_prior_in = ns_variables([prior_ns_structure[0]])
+    W1_prior_in = w_variable_mean([dim_data, prior_ns_structure[0]])
+    bias1_prior_in = w_variable_mean([prior_ns_structure[0]])
 
-    W2_prior_in = ns_variables([prior_ns_structure[0], prior_ns_structure[1]])
-    bias2_prior_in = ns_variables([prior_ns_structure[1]])
+    W2_prior_in = w_variable_mean([prior_ns_structure[0], prior_ns_structure[1]])
+    bias2_prior_in = w_variable_mean([prior_ns_structure[1]])
 
-    W3_prior_in = ns_variables([prior_ns_structure[1], prior_ns_structure[2]])
-    bias3_prior_in = ns_variables([prior_ns_structure[2]])
+    W3_prior_in = w_variable_mean([prior_ns_structure[1], prior_ns_structure[2]])
+    bias3_prior_in = w_variable_mean([prior_ns_structure[2]])
 
     return {'W1_prior_noise': W1_prior_noise, 'bias1_prior_noise':bias1_prior_noise,
             'W2_prior_noise': W2_prior_noise, 'bias2_prior_noise':bias2_prior_noise,
@@ -53,12 +57,15 @@ def create_ns_prior(dim_data, prior_ns_structure, n_layers_ns):
 #       ns                      :   network created previously for the sampler
 # Outputs:
 #       []                      :   list of variables
-def get_variables_ns(ns):
+def get_variables_ns_prior(ns):
 
     # Extract the variables from the neural sampler as a list
-    return [ ns["W1_prior_noise"], ns["bias1_prior_noise"], ns["W2_prior_noise"], ns["bias2_prior_noise"], \
-        ns["W3_prior_noise"], ns["bias3_prior_noise"], ns["W1_prior_in"], ns["bias1_prior_in"], \
-        ns["W2_prior_in"], ns["bias2_prior_in"], ns["W3_prior_in"], ns["bias3_prior_in"] ]
+    return [ ns["W1_prior_noise"], ns["bias1_prior_noise"], \
+    	ns["W2_prior_noise"], ns["bias2_prior_noise"], \
+        ns["W3_prior_noise"], ns["bias3_prior_noise"], \
+        ns["W1_prior_in"], ns["bias1_prior_in"], \
+        ns["W2_prior_in"], ns["bias2_prior_in"], \
+        ns["W3_prior_in"], ns["bias3_prior_in"] ]
 
 
 

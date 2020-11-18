@@ -48,7 +48,7 @@ def create_neural_sampler(ns_structure, noise_comps_ns, n_layers_ns):
 # Outputs:
 #       []                      :   list of variables in the NS
 #
-def get_variables_ns(neural_sampler):
+def get_variables_ns_posterior(neural_sampler):
     return [ neural_sampler['mean_noise'], neural_sampler['log_var_noise'], neural_sampler['W1_ns'], \
         neural_sampler['W2_ns'], neural_sampler['W3_ns'], neural_sampler['bias1_ns'], \
         neural_sampler['bias2_ns'], neural_sampler['bias3_ns'] ]

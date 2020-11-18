@@ -71,7 +71,7 @@ n_epochs = 2000
 ratio_train = 0.9 # Percentage of the data devoted to train
 
 # Number of inducing points
-number_IP = 500
+number_IP = 100	
 
 # Parameters concerning the annealing factor of the KL divergence
 kl_factor_limit = int(n_epochs / 20)
@@ -217,7 +217,7 @@ def main(permutation, split, alpha, layers):
     # import pdb; pdb.set_trace()
 
     additive_factor = 1e-5
-    inv_K_zz = K_zz + tf.eye(tf.shape(K_zz)[ 0 ]) * additive_factor   # To ensure it is invertible we add a small noise
+    # inv_K_zz = K_zz + tf.eye(tf.shape(K_zz)[ 0 ]) * additive_factor   # To ensure it is invertible we add a small noise
 
     # Obtain samples from the approximating distribution
     samples_qu = compute_output_ns(neural_sampler, n_samples, noise_comps_ns)    # right now, dims are (number_IP, n_samples)
@@ -227,9 +227,18 @@ def main(permutation, split, alpha, layers):
     #################
 
     # Estimate the moments of the p(f(x)|f(z))
-    inv_term = tf.linalg.inv( inv_K_zz )
-    cov_product = tf.matmul(K_xz, inv_term)
+    # inv_term = tf.linalg.inv( inv_K_zz )
+	# cov_product = tf.matmul(K_xz, inv_term)
 
+    # Estimate the inverse of K_zz using Cholesky
+    K_zz_add_noise = K_zz + tf.eye( tf.shape(K_zz)[0] ) * 1e-5 
+    chol_Kzz = tf.linalg.cholesky( K_zz_add_noise ) 
+    inv_chol_Kzz =  tf.linalg.triangular_solve( chol_Kzz, rhs = tf.eye(tf.shape(chol_Kzz)[0]), lower = True )
+
+    first_product = tf.matmul( K_xz, inv_chol_Kzz, transpose_b = True )
+    cov_product = tf.matmul( first_product, inv_chol_Kzz )
+
+    
     #### WE ARE DOING THE MEAN THROUGH THE SAMPLES OF f(z) (= u)
     # Instead of using u from the prior p(), we use u from the approximate distribution q() for the differences in the expression
     mean_est = tf.expand_dims(m_fx, -1) + tf.tensordot(cov_product,  (samples_qu - tf.expand_dims(m_fz, -1)), axes = [[1], [0]])   # Dimensions: first term: (batchsize, 1); sec. term: (batchsize, n_samples)
@@ -237,7 +246,7 @@ def main(permutation, split, alpha, layers):
 
 
     sample_pf_noise = tf.random_normal(shape = [ tf.shape(x)[0], n_samples ] )
-    inner_cholesky = cov_est + tf.eye( tf.shape(x)[0] ) * 1e-2
+    inner_cholesky = cov_est + tf.eye( tf.shape(x)[0] ) * 1e-5
 
     # import pdb; pdb.set_trace()
 
@@ -330,7 +339,7 @@ def main(permutation, split, alpha, layers):
     neg_ELBO = -ELBO
     mean_ELBO = ELBO
 
-    vars_primal = get_variables_ns(neural_sampler) + get_variables_bnn(bnn) + [ log_sigma2_noise, z ]
+    vars_primal = get_variables_ns_posterior(neural_sampler) + get_variables_bnn(bnn) + [ log_sigma2_noise, z ]
     vars_disc_prior = get_variables_discriminator(discriminator_prior)
     vars_disc_approx = get_variables_discriminator(discriminator_approx)
 
@@ -354,7 +363,7 @@ def main(permutation, split, alpha, layers):
         total_ini = time.time()
 
         # Export the value of the prior functions before the training begins
-        input, ips, resx, resz, labels = sess.run([x, z, fx, fz, y_], feed_dict={x: X_test, y_: y_test, n_samples: 20})
+        input, ips, resx, resz, labels = sess.run([x, z, fx, fz, y_], feed_dict={x: X_test, y_: y_test, n_samples: 100})
         merge_fx = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(resx)], axis = 1)
         merge_fx.to_csv('res_IP/' + str(alpha) + '/' + str(alpha) + "_initial_prior_samples_fx.csv", index = False)
 
@@ -392,8 +401,7 @@ def main(permutation, split, alpha, layers):
 
                 # import pdb; pdb.set_trace()
 
-                sess.run(train_step_disc_prior, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
-                    kl_factor_: kl_factor})
+                sess.run(train_step_disc_prior, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
                 sess.run(train_step_disc_approx, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
                     kl_factor_: kl_factor})
                 sess.run(train_step_primal, feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, \
@@ -442,7 +450,7 @@ def main(permutation, split, alpha, layers):
 
 
         # Export values after training (predictions, prior functions samples, IP's locations)
-        input, ips, resx, resz, labels, results = sess.run([x, z, fx, fz, y_, y_test_estimated], feed_dict={x: X_test, y_: y_test, n_samples: n_samples_test})
+        input, ips, resx, resz, labels, results = sess.run([x, z, fx, fz, y_, y_test_estimated], feed_dict={x: X_test, y_: y_test, n_samples: 100})
 
         # Store the prior functions samples
         merge_fx = pd.concat([pd.DataFrame(input), pd.DataFrame(labels), pd.DataFrame(resx)], axis = 1)
