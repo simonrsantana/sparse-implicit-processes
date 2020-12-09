@@ -1,0 +1,132 @@
+WARNING:root:Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+WARNING:tensorflow:From AIP_ns.py:117: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From AIP_ns.py:117: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From AIP_ns.py:167: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:From AIP_ns.py:167: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:From /lustre/home/simonrs/implicit-processes/prior_tests/forced_prior/nsprior_alt/test_bim/prior_neural_sampler.py:97: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From /lustre/home/simonrs/implicit-processes/prior_tests/forced_prior/nsprior_alt/test_bim/prior_neural_sampler.py:97: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From AIP_ns.py:292: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From AIP_ns.py:292: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/math_ops.py:2509: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+WARNING:tensorflow:From /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/math_ops.py:2509: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+WARNING:tensorflow:From AIP_ns.py:379: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From AIP_ns.py:379: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From AIP_ns.py:391: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From AIP_ns.py:391: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From AIP_ns.py:396: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+WARNING:tensorflow:From AIP_ns.py:396: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2020-12-08 16:51:40.208734: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2020-12-08 16:51:40.216507: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2394350000 Hz
+2020-12-08 16:51:40.216733: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55a5138313f0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-12-08 16:51:40.216781: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-12-08 16:51:40.218107: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcuda.so.1
+2020-12-08 16:51:40.225927: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1618] Found device 0 with properties: 
+name: Tesla P100-PCIE-16GB major: 6 minor: 0 memoryClockRate(GHz): 1.3285
+pciBusID: 0000:81:00.0
+2020-12-08 16:51:40.226907: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.0
+2020-12-08 16:51:40.229297: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+2020-12-08 16:51:40.231576: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10.0
+2020-12-08 16:51:40.232539: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10.0
+2020-12-08 16:51:40.235492: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10.0
+2020-12-08 16:51:40.237670: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10.0
+2020-12-08 16:51:40.243314: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-12-08 16:51:40.244644: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1746] Adding visible gpu devices: 0
+2020-12-08 16:51:40.244707: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.0
+2020-12-08 16:51:40.363894: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1159] Device interconnect StreamExecutor with strength 1 edge matrix:
+2020-12-08 16:51:40.363992: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1165]      0 
+2020-12-08 16:51:40.364015: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1178] 0:   N 
+2020-12-08 16:51:40.365852: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1304] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 4884 MB memory) -> physical GPU (device: 0, name: Tesla P100-PCIE-16GB, pci bus id: 0000:81:00.0, compute capability: 6.0)
+2020-12-08 16:51:40.367936: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55a5142925c0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2020-12-08 16:51:40.367983: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Tesla P100-PCIE-16GB, Compute Capability 6.0
+WARNING:tensorflow:From AIP_ns.py:398: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+WARNING:tensorflow:From AIP_ns.py:398: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+2020-12-08 16:51:41.321085: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+2020-12-08 16:51:42.040230: I tensorflow/core/kernels/cuda_solvers.cc:159] Creating CudaSolver handles for stream 0x55a514278760
+2020-12-08 16:51:42.040443: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10.0
+2020-12-08 16:51:42.321559: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+WARNING:root:Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+WARNING:tensorflow:From AIP_ns.py:117: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From AIP_ns.py:117: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From AIP_ns.py:167: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:From AIP_ns.py:167: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:From /lustre/home/simonrs/implicit-processes/prior_tests/forced_prior/nsprior_alt/test_bim/prior_neural_sampler.py:97: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From /lustre/home/simonrs/implicit-processes/prior_tests/forced_prior/nsprior_alt/test_bim/prior_neural_sampler.py:97: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From AIP_ns.py:292: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From AIP_ns.py:292: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/math_ops.py:2509: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+WARNING:tensorflow:From /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/math_ops.py:2509: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+WARNING:tensorflow:From AIP_ns.py:379: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From AIP_ns.py:379: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From AIP_ns.py:391: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From AIP_ns.py:391: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From AIP_ns.py:396: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+WARNING:tensorflow:From AIP_ns.py:396: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2020-12-09 07:13:29.621054: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2020-12-09 07:13:30.531278: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2394350000 Hz
+2020-12-09 07:13:30.532755: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x5605f7d25210 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-12-09 07:13:30.532874: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-12-09 07:13:30.572706: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcuda.so.1
+2020-12-09 07:13:30.664916: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1618] Found device 0 with properties: 
+name: Tesla P100-PCIE-16GB major: 6 minor: 0 memoryClockRate(GHz): 1.3285
+pciBusID: 0000:81:00.0
+2020-12-09 07:13:30.834731: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.0
+2020-12-09 07:13:30.920526: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+2020-12-09 07:13:31.058789: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10.0
+2020-12-09 07:13:31.798453: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10.0
+2020-12-09 07:13:31.874556: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10.0
+2020-12-09 07:13:32.019307: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10.0
+2020-12-09 07:13:32.185186: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-12-09 07:13:32.187257: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1746] Adding visible gpu devices: 0
+2020-12-09 07:13:32.187350: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.0
+2020-12-09 07:13:32.398047: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1159] Device interconnect StreamExecutor with strength 1 edge matrix:
+2020-12-09 07:13:32.398158: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1165]      0 
+2020-12-09 07:13:32.398186: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1178] 0:   N 
+2020-12-09 07:13:32.407135: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1304] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 4884 MB memory) -> physical GPU (device: 0, name: Tesla P100-PCIE-16GB, pci bus id: 0000:81:00.0, compute capability: 6.0)
+2020-12-09 07:13:32.452753: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x5605f87863c0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2020-12-09 07:13:32.452871: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Tesla P100-PCIE-16GB, Compute Capability 6.0
+WARNING:tensorflow:From AIP_ns.py:398: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+WARNING:tensorflow:From AIP_ns.py:398: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+2020-12-09 07:13:33.489605: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+2020-12-09 07:13:34.190125: I tensorflow/core/kernels/cuda_solvers.cc:159] Creating CudaSolver handles for stream 0x5605f876c560
+2020-12-09 07:13:34.190356: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10.0
+2020-12-09 07:13:34.424386: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0

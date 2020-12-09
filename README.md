@@ -20,6 +20,8 @@ We have two setups for the model: one that makes use of BNNs to model the implic
 
 The rest of the codes included here, and additional folders that may appear are just auxiliary and extra material that aid to develop the main code, on which it is based on. 
 
+### The folder of [test_codes](test_codes) includes experimental versions of the code, changing priors and/or posterior models and formulations
+
 
 ### Examples with synthetic data:
 

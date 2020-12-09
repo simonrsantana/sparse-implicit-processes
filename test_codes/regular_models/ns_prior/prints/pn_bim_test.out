@@ -1,0 +1,207 @@
+mkdir: cannot create directory ‘running_prints’: File exists
+WARNING:root:Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+WARNING:tensorflow:From AIP_ns.py:117: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From AIP_ns.py:117: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From AIP_ns.py:167: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:From AIP_ns.py:167: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:From /lustre/home/simonrs/implicit-processes/prior_tests/regular_prior/nsprior_alt/test_bim/prior_neural_sampler.py:97: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From /lustre/home/simonrs/implicit-processes/prior_tests/regular_prior/nsprior_alt/test_bim/prior_neural_sampler.py:97: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From AIP_ns.py:290: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From AIP_ns.py:290: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/math_ops.py:2509: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+WARNING:tensorflow:From /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/math_ops.py:2509: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+WARNING:tensorflow:From AIP_ns.py:377: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From AIP_ns.py:377: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From AIP_ns.py:390: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From AIP_ns.py:390: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From AIP_ns.py:394: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+WARNING:tensorflow:From AIP_ns.py:394: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2020-12-08 19:05:09.787221: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2020-12-08 19:05:09.794281: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2394350000 Hz
+2020-12-08 19:05:09.794511: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x555c78d844d0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-12-08 19:05:09.794558: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-12-08 19:05:09.795930: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcuda.so.1
+2020-12-08 19:05:09.803863: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1618] Found device 0 with properties: 
+name: Tesla P100-PCIE-16GB major: 6 minor: 0 memoryClockRate(GHz): 1.3285
+pciBusID: 0000:02:00.0
+2020-12-08 19:05:09.804880: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.0
+2020-12-08 19:05:09.807065: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+2020-12-08 19:05:09.809229: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10.0
+2020-12-08 19:05:09.810205: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10.0
+2020-12-08 19:05:09.812834: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10.0
+2020-12-08 19:05:09.815058: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10.0
+2020-12-08 19:05:09.820591: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-12-08 19:05:09.821903: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1746] Adding visible gpu devices: 0
+2020-12-08 19:05:09.821966: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.0
+2020-12-08 19:05:09.938535: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1159] Device interconnect StreamExecutor with strength 1 edge matrix:
+2020-12-08 19:05:09.938633: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1165]      0 
+2020-12-08 19:05:09.938656: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1178] 0:   N 
+2020-12-08 19:05:09.940543: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1304] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 4884 MB memory) -> physical GPU (device: 0, name: Tesla P100-PCIE-16GB, pci bus id: 0000:02:00.0, compute capability: 6.0)
+2020-12-08 19:05:09.942572: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x555c79bbb170 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2020-12-08 19:05:09.942613: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Tesla P100-PCIE-16GB, Compute Capability 6.0
+WARNING:tensorflow:From AIP_ns.py:396: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+WARNING:tensorflow:From AIP_ns.py:396: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+2020-12-08 19:05:10.880188: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+2020-12-08 19:05:11.613512: I tensorflow/core/kernels/cuda_solvers.cc:159] Creating CudaSolver handles for stream 0x555c79bad520
+2020-12-08 19:05:11.613683: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10.0
+2020-12-08 19:05:11.866131: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+Traceback (most recent call last):
+  File "AIP_ns.py", line 632, in <module>
+    main(available_perm[split,], split, alpha, layers)
+  File "AIP_ns.py", line 450, in main
+    kl_factor_: kl_factor})
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/client/session.py", line 956, in run
+    run_metadata_ptr)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/client/session.py", line 1180, in _run
+    feed_dict_tensor, options, run_metadata)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/client/session.py", line 1359, in _do_run
+    run_metadata)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/client/session.py", line 1384, in _do_call
+    raise type(e)(node_def, op, message)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Cholesky decomposition was not successful. The input might not be valid.
+	 [[node Cholesky_1 (defined at /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py:1748) ]]
+
+Original stack trace for u'Cholesky_1':
+  File "AIP_ns.py", line 632, in <module>
+    main(available_perm[split,], split, alpha, layers)
+  File "AIP_ns.py", line 283, in main
+    chol_decomposition = tf.cast( tf.linalg.cholesky( inner_cholesky ), dtype = tf.float64 )
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/gen_linalg_ops.py", line 820, in cholesky
+    "Cholesky", input=input, name=name)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/op_def_library.py", line 794, in _apply_op_helper
+    op_def=op_def)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/util/deprecation.py", line 507, in new_func
+    return func(*args, **kwargs)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py", line 3357, in create_op
+    attrs, op_def, compute_device)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py", line 3426, in _create_op_internal
+    op_def=op_def)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py", line 1748, in __init__
+    self._traceback = tf_stack.extract_stack()
+
+WARNING:root:Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+WARNING:tensorflow:From AIP_ns.py:117: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From AIP_ns.py:117: The name tf.set_random_seed is deprecated. Please use tf.compat.v1.set_random_seed instead.
+
+WARNING:tensorflow:From AIP_ns.py:167: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:From AIP_ns.py:167: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+WARNING:tensorflow:From /lustre/home/simonrs/implicit-processes/prior_tests/regular_prior/nsprior_alt/test_bim/prior_neural_sampler.py:97: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From /lustre/home/simonrs/implicit-processes/prior_tests/regular_prior/nsprior_alt/test_bim/prior_neural_sampler.py:97: The name tf.random_normal is deprecated. Please use tf.random.normal instead.
+
+WARNING:tensorflow:From AIP_ns.py:290: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From AIP_ns.py:290: The name tf.log is deprecated. Please use tf.math.log instead.
+
+WARNING:tensorflow:From /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/math_ops.py:2509: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+WARNING:tensorflow:From /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/math_ops.py:2509: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+WARNING:tensorflow:From AIP_ns.py:377: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From AIP_ns.py:377: The name tf.train.AdamOptimizer is deprecated. Please use tf.compat.v1.train.AdamOptimizer instead.
+
+WARNING:tensorflow:From AIP_ns.py:390: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From AIP_ns.py:390: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From AIP_ns.py:394: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+WARNING:tensorflow:From AIP_ns.py:394: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2020-12-08 20:17:36.760665: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2020-12-08 20:17:36.768488: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2394350000 Hz
+2020-12-08 20:17:36.768737: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x556472620040 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-12-08 20:17:36.768799: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-12-08 20:17:36.771951: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcuda.so.1
+2020-12-08 20:17:36.780406: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1618] Found device 0 with properties: 
+name: Tesla P100-PCIE-16GB major: 6 minor: 0 memoryClockRate(GHz): 1.3285
+pciBusID: 0000:02:00.0
+2020-12-08 20:17:36.981019: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.0
+2020-12-08 20:17:37.066319: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+2020-12-08 20:17:37.214965: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10.0
+2020-12-08 20:17:38.035256: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10.0
+2020-12-08 20:17:38.123509: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10.0
+2020-12-08 20:17:38.268465: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10.0
+2020-12-08 20:17:38.411586: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-12-08 20:17:38.413169: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1746] Adding visible gpu devices: 0
+2020-12-08 20:17:38.413245: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.0
+2020-12-08 20:17:38.652066: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1159] Device interconnect StreamExecutor with strength 1 edge matrix:
+2020-12-08 20:17:38.652170: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1165]      0 
+2020-12-08 20:17:38.652196: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1178] 0:   N 
+2020-12-08 20:17:38.654342: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1304] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 4884 MB memory) -> physical GPU (device: 0, name: Tesla P100-PCIE-16GB, pci bus id: 0000:02:00.0, compute capability: 6.0)
+2020-12-08 20:17:38.656717: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x5564730810d0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2020-12-08 20:17:38.656765: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Tesla P100-PCIE-16GB, Compute Capability 6.0
+WARNING:tensorflow:From AIP_ns.py:396: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+WARNING:tensorflow:From AIP_ns.py:396: The name tf.global_variables_initializer is deprecated. Please use tf.compat.v1.global_variables_initializer instead.
+
+2020-12-08 20:17:39.660861: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+2020-12-08 20:17:40.431375: I tensorflow/core/kernels/cuda_solvers.cc:159] Creating CudaSolver handles for stream 0x556473073480
+2020-12-08 20:17:40.431586: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10.0
+2020-12-08 20:17:40.707750: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10.0
+Traceback (most recent call last):
+  File "AIP_ns.py", line 632, in <module>
+    main(available_perm[split,], split, alpha, layers)
+  File "AIP_ns.py", line 454, in main
+    cross_entropy_q], feed_dict={x: batch[ 0 ], y_: batch[ 1 ], n_samples: n_samples_train, kl_factor_: kl_factor})
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/client/session.py", line 956, in run
+    run_metadata_ptr)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/client/session.py", line 1180, in _run
+    feed_dict_tensor, options, run_metadata)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/client/session.py", line 1359, in _do_run
+    run_metadata)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/client/session.py", line 1384, in _do_call
+    raise type(e)(node_def, op, message)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: 2 root error(s) found.
+  (0) Invalid argument: Cholesky decomposition was not successful. The input might not be valid.
+	 [[node Cholesky_1 (defined at /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py:1748) ]]
+	 [[Sum/_557]]
+  (1) Invalid argument: Cholesky decomposition was not successful. The input might not be valid.
+	 [[node Cholesky_1 (defined at /home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py:1748) ]]
+0 successful operations.
+0 derived errors ignored.
+
+Original stack trace for u'Cholesky_1':
+  File "AIP_ns.py", line 632, in <module>
+    main(available_perm[split,], split, alpha, layers)
+  File "AIP_ns.py", line 283, in main
+    chol_decomposition = tf.cast( tf.linalg.cholesky( inner_cholesky ), dtype = tf.float64 )
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/ops/gen_linalg_ops.py", line 820, in cholesky
+    "Cholesky", input=input, name=name)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/op_def_library.py", line 794, in _apply_op_helper
+    op_def=op_def)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/util/deprecation.py", line 507, in new_func
+    return func(*args, **kwargs)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py", line 3357, in create_op
+    attrs, op_def, compute_device)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py", line 3426, in _create_op_internal
+    op_def=op_def)
+  File "/home/proyectos/ada2/dhernand/tensorflow/lib/python2.7/site-packages/tensorflow_core/python/framework/ops.py", line 1748, in __init__
+    self._traceback = tf_stack.extract_stack()
+
