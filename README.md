@@ -4,7 +4,7 @@
 
 All the results for the current prior and posterior approximations comparisons are included in the folder [synthetic_experiments](synthetic_experiments). Here we have 4 different, from which we have the folder of the comparisons [compared_results](synthetic_experiments/compared_results) and other three including the code that can be used to generate the results being compared before. 
 
-In order to see the results, we have included the `.R` code in the  [synthetic_experiments/compared_results](synthetic_experiments/compared results) folder, where one can generate one of the grid plots present in the very same folder (`comparison_plots.R` generates the heatmaps, `functions_comparison_plots.R` generates the function-wise plots). 
+In order to see the results, we have included the `.R` code in the [compared_results](synthetic_experiments/compared_results) folder, where one can generate one of the grid plots present in the very same folder (`comparison_plots.R` generates the heatmaps, `functions_comparison_plots.R` generates the function-wise plots). 
 
 ### Structure of the code
 
