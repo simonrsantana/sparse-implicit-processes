@@ -1,5 +1,11 @@
 ## Code for VIP modified
 
+### Synthetic experiments comparison
+
+All the results for the current prior and posterior approximations comparisons are included in the folder [synthetic_experiments](synthetic_experiments). Here we have 4 different, from which we have the folder of the comparisons [synthetic_experiments/compared_results](compared results) and other three including the code that can be used to generate the results being compared before. 
+
+In order to see the results, we have included the `.R` code in the  [synthetic_experiments/compared_results](compared results) folder, where one can generate one of the grid plots present in the very same folder (`comparison_plots.R` generates the heatmaps, `functions_comparison_plots.R` generates the function-wise plots). 
+
 ### Structure of the code
 
 We have two setups for the model: one that makes use of BNNs to model the implicit prior distribution, and another that uses Neural Samplers to do so. The BNN-based can be found in [VIIP-BNN_prior](VIIP-BNN_prior), and the NS-based on [VIIP-NS_prior](VIIP-NS_prior). For each of them, the structure of the code goes as follows: 
