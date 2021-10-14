@@ -20,5 +20,5 @@ The rest of the python codes present in each folder serve to control the random 
 
 **To run the code, do:** python SIP_main.py [split] [alpha value] [n_layers (1 or 2)] [dataset as .txt]
 
-The rest of the codes included here, and additional folders that may appear are just auxiliary and extra material that aid to develop the main code, on which it is based on. 
+The rest of the codes included here, and additional folders that may appear are just auxiliary and extra material that aid to develop the main code, on which it is based on. We have also included a .yml file to replicate the conda environment we have employed to conduct the experiments.
 
