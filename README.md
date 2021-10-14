@@ -6,7 +6,7 @@ In this repository we include the two different versions of the SIP code develop
 
 We have two setups for the model: one that makes use of BNNs to model the implicit prior distribution, and another that uses Neural Samplers to do so. The BNN-based can be found in [VIIP-BNN_prior](VIIP-BNN_prior), and the NS-based on [VIIP-NS_prior](VIIP-NS_prior). For each of them, the structure of the code goes as follows: 
 
-* **SIP_**(·)**.py**: Main body of the code. Includes calls to other functions to make the calculations needed in the model.
+* **SIP_bnn.py** or **SIP_ns.py**: Main body of the code. Includes calls to other functions to make the calculations needed in the model.
 
 * **aux_functions.py**: Create auxiliary functions that estimate moments from given samples of functions evaluated at selected points (mean, deviation and covariance between two collections of samples).
 
@@ -20,5 +20,5 @@ The rest of the python codes present in each folder serve to control the random 
 
 **To run the code, do:** python SIP_main.py [split] [alpha value] [n_layers (1 or 2)] [dataset as .txt]
 
-The rest of the codes included here, and additional folders that may appear are just auxiliary and extra material that aid to develop the main code, on which it is based on. We have also included a .yml file to replicate the conda environment we have employed to conduct the experiments.
+The rest of the codes included here, and additional folders that may appear are just auxiliary and extra material that aid to develop the main code, on which it is based on. We have also included a .yml file to replicate the conda environment we have employed to conduct the experiments.	
 
