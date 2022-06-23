@@ -1,6 +1,6 @@
 ## Sparse Implicit Processes
 
-In this repository we include the two different versions of the SIP code developed for the article __Function Space Inference with Sparse Implicit Processes__. 
+In this repository we include the two different versions of the SIP code developed for the article __Function-space Inference with Sparse Implicit Processes__. 
 
 ### Structure of the code
 
